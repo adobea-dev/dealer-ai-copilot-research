@@ -1,8 +1,9 @@
 {
-    "generator_version": "2.0.0",
+    "generator_version": "2.1.0",
     "random_seed": 42,
     "start_date": "2024-01-01",
-    "end_date": "2025-12-31",
+    "analysis_end_date": "2025-12-31",
+    "simulation_end_date": "2026-01-31",
     "countries": [
         "GH",
         "NG",
@@ -10,10 +11,10 @@
         "UG"
     ],
     "dealer_count": 125,
-    "lead_count": 85584,
-    "application_count": 25857,
-    "approved_application_count": 17457,
-    "rejected_application_count": 8400,
-    "sale_count": 10133,
-    "note": "This dataset is synthetic. Country-level demand multipliers and behavioural relationships are simulation parameters and are not empirical claims about real automotive markets."
+    "lead_count": 82716,
+    "application_count": 24512,
+    "approved_application_count": 15839,
+    "rejected_application_count": 8673,
+    "sale_count": 8801,
+    "note": "This dataset is fully synthetic. Country demand multipliers, dealer characteristics, conversion probabilities, transaction values, and temporal relationships are simulation parameters and must not be interpreted as empirical claims about real automotive markets."
 }

@@ -10,18 +10,20 @@ import pandas as pd
 from .config import SimulationConfig
 
 
-# ---------------------------------------------------------------------
+# =====================================================================
 # GLOBAL CONSTANTS
-# ---------------------------------------------------------------------
+# =====================================================================
 
-# UUID namespace used to create deterministic/reproducible UUID values.
+# Namespace used by UUID5 to create deterministic identifiers.
 #
-# Using uuid5 rather than uuid4 means that if we rerun the generator
-# using the same seed and inputs, the IDs remain reproducible.
-NAMESPACE = uuid.UUID("2c4a3854-aead-4df1-881e-cfa6576a321b")
+# UUID5 is preferable here to random UUID4 because the same input string
+# always produces the same ID. This improves experiment reproducibility.
+NAMESPACE = uuid.UUID(
+    "2c4a3854-aead-4df1-881e-cfa6576a321b"
+)
 
 
-# Lead acquisition channels visible to the analytics system.
+# Synthetic lead acquisition channels.
 LEAD_SOURCES = [
     "organic_web",
     "paid_search",
@@ -31,7 +33,7 @@ LEAD_SOURCES = [
 ]
 
 
-# Channels through which a lead may submit an application.
+# Synthetic channels through which applications may be submitted.
 APPLICATION_CHANNELS = [
     "online",
     "dealer_branch",
@@ -39,11 +41,10 @@ APPLICATION_CHANNELS = [
 ]
 
 
-# Financing institutions are synthetic.
+# Synthetic financing institutions.
 #
-# We deliberately avoid using real bank names because this dataset
-# represents a simulated business environment rather than empirical
-# observations about specific institutions.
+# We intentionally avoid real bank names because the generated data is
+# not intended to make claims about actual institutions.
 FINANCING_BANKS = [
     "Bank_A",
     "Bank_B",
@@ -52,149 +53,174 @@ FINANCING_BANKS = [
 ]
 
 
-# Maximum delays between funnel stages.
-#
-# These introduce temporal realism while ensuring that:
-#
-# lead_date <= application_date <= sale_date
-#
+# Maximum number of days between a lead and an application.
 MAX_APPLICATION_DELAY_DAYS = 10
+
+# Maximum number of days between an approved application and a sale.
 MAX_SALE_DELAY_DAYS = 21
 
 
-# ---------------------------------------------------------------------
+# =====================================================================
 # UTILITY FUNCTIONS
-# ---------------------------------------------------------------------
+# =====================================================================
 
 
-def deterministic_uuid(value: str) -> str:
+def deterministic_uuid(
+    value: str,
+) -> str:
     """
-    Generate a reproducible UUID from a stable input string.
+    Generate a reproducible UUID from a stable text value.
 
     Example
     -------
     deterministic_uuid("dealer:GH:001")
 
-    will always generate the same UUID.
+    will always produce the same UUID.
     """
-    return str(uuid.uuid5(NAMESPACE, value))
+
+    return str(
+        uuid.uuid5(
+            NAMESPACE,
+            value,
+        )
+    )
 
 
-def sigmoid(x: float) -> float:
+def sigmoid(
+    x: float,
+) -> float:
     """
-    Convert a real-valued score into a probability between 0 and 1.
+    Convert an unrestricted numerical value into a probability.
 
-    This is useful for transforming latent dealer characteristics into
-    realistic probabilities such as:
+    The resulting value is always between 0 and 1.
 
-    - application conversion probability
-    - approval probability
-    - sale conversion probability
+    This is used when converting hidden dealer characteristics into
+    probabilities such as application conversion or sale conversion.
     """
-    return 1.0 / (1.0 + math.exp(-x))
+
+    return 1.0 / (
+        1.0
+        + math.exp(-x)
+    )
 
 
-def seasonal_factor(month: int) -> float:
+def seasonal_factor(
+    month: int,
+) -> float:
     """
-    Return a mild seasonal demand multiplier for a calendar month.
+    Create mild yearly seasonality in lead demand.
 
-    The purpose is to create realistic temporal variation without making
-    seasonality dominate dealer-level performance.
+    The factor varies approximately between 0.88 and 1.12.
 
-    The factor varies approximately between:
-
-        0.88 and 1.12
-
-    This pattern is synthetic and should NOT be interpreted as evidence
-    of real automotive seasonality in any included country.
+    IMPORTANT:
+    This is a synthetic temporal pattern and is NOT intended to represent
+    observed automotive seasonality in Ghana, Nigeria, Kenya, or Uganda.
     """
-    angle = 2 * math.pi * (month - 1) / 12
 
-    return 1.0 + 0.12 * math.sin(angle - 0.5)
+    angle = (
+        2
+        * math.pi
+        * (month - 1)
+        / 12
+    )
+
+    return (
+        1.0
+        + 0.12
+        * math.sin(
+            angle - 0.5
+        )
+    )
 
 
 def generate_month_periods(
     config: SimulationConfig,
 ) -> pd.DatetimeIndex:
     """
-    Generate one timestamp for the beginning of each simulation month.
+    Generate months during which new leads may be created.
 
-    Example
-    -------
-    For:
+    New leads exist only inside the primary analysis window:
 
-        start_date = 2024-01-01
-        end_date   = 2025-12-31
+        2024-01 through 2025-12
 
-    this returns 24 monthly periods.
+    The additional simulation period in January 2026 is NOT used to
+    generate new leads. It exists only to allow existing leads to mature.
     """
+
     return pd.date_range(
         start=config.start_date,
-        end=config.end_date,
+        end=config.analysis_end_date,
         freq="MS",
     )
 
 
-# ---------------------------------------------------------------------
+# =====================================================================
 # DEALER GENERATION
-# ---------------------------------------------------------------------
+# =====================================================================
 
 
 def generate_dealers(
     config: SimulationConfig,
     rng: np.random.Generator,
-) -> tuple[pd.DataFrame, pd.DataFrame]:
+) -> tuple[
+    pd.DataFrame,
+    pd.DataFrame,
+]:
     """
-    Generate dealer records and hidden dealer-level simulation parameters.
+    Generate the dealer population.
 
-    Two datasets are returned.
+    Returns two tables:
 
     dealers
-    -------
-    Contains information that WILL eventually be available to the
-    experimental systems.
+        Visible dealer information that can eventually be loaded into
+        the experimental PostgreSQL database.
 
     dealer_truth
-    ------------
-    Contains hidden parameters used to generate behaviour.
+        Hidden parameters used by the data-generating process.
 
-    dealer_truth must NOT be loaded into PostgreSQL or exposed to the
-    Text-to-SQL or agentic systems.
-
-    This separation helps prevent information leakage during evaluation.
+    The hidden truth must NEVER be exposed to the Text-to-SQL baseline
+    or the agentic analytics system.
     """
 
     dealer_rows: list[dict] = []
     truth_rows: list[dict] = []
 
-    for country, n_dealers in config.dealers_per_country.items():
+    for (
+        country,
+        n_dealers,
+    ) in config.dealers_per_country.items():
 
-        for index in range(n_dealers):
+        for index in range(
+            n_dealers
+        ):
 
-            dealer_id = deterministic_uuid(
-                f"dealer:{country}:{index:03d}"
+            # ---------------------------------------------------------
+            # IDENTIFIER AND LOCATION
+            # ---------------------------------------------------------
+
+            dealer_id = (
+                deterministic_uuid(
+                    f"dealer:{country}:{index:03d}"
+                )
             )
 
             city = str(
                 rng.choice(
-                    config.cities[country]
+                    config.cities[
+                        country
+                    ]
                 )
             )
 
             # ---------------------------------------------------------
-            # LATENT DEALER QUALITY
+            # LATENT OVERALL DEALER QUALITY
             # ---------------------------------------------------------
             #
-            # This represents an unobserved dealer characteristic.
+            # This is not visible to the AI systems.
             #
-            # Higher-quality dealers tend to:
-            # - generate more leads
-            # - convert more leads into applications
-            # - receive more approvals
-            # - convert more approvals into sales
-            #
-            # However, independent noise is added below so that quality
-            # does NOT create a perfectly ordered ranking.
+            # Quality influences several parts of the funnel, but its
+            # effect is deliberately limited so that one variable does
+            # not determine all dealer performance.
             quality = float(
                 rng.normal(
                     loc=0.0,
@@ -202,30 +228,73 @@ def generate_dealers(
                 )
             )
 
-            # Independent noise introduces overlap between dealers.
+            # ---------------------------------------------------------
+            # STAGE-SPECIFIC RANDOM VARIATION
+            # ---------------------------------------------------------
             #
-            # This prevents the dataset from behaving like our previous
-            # Bronze/Silver/Gold/Platinum tier system where dealer
-            # performance was almost predetermined.
+            # Independent noise helps create dealers with different
+            # strengths and weaknesses.
+            #
+            # Example:
+            #
+            # Dealer A:
+            #   high lead volume
+            #   weak application conversion
+            #
+            # Dealer B:
+            #   moderate lead volume
+            #   strong application conversion
+            #
+            # Dealer C:
+            #   good approvals
+            #   weak final sale conversion
+            #
+            # This is more useful for analytics than simple performance
+            # tiers where the same dealers dominate every metric.
+
             lead_noise = float(
-                rng.normal(0.0, 0.30)
+                rng.normal(
+                    0.0,
+                    0.30,
+                )
             )
 
             app_noise = float(
-                rng.normal(0.0, 0.35)
+                rng.normal(
+                    0.0,
+                    0.45,
+                )
             )
 
             approval_noise = float(
-                rng.normal(0.0, 0.30)
+                rng.normal(
+                    0.0,
+                    0.40,
+                )
             )
 
             sales_noise = float(
-                rng.normal(0.0, 0.35)
+                rng.normal(
+                    0.0,
+                    0.45,
+                )
             )
 
-            # Typical number of monthly leads.
+            # Variation in typical transaction value.
+            value_noise = float(
+                rng.normal(
+                    0.0,
+                    0.20,
+                )
+            )
+
+            # ---------------------------------------------------------
+            # LEAD VOLUME
+            # ---------------------------------------------------------
+
+            # Expected monthly lead volume.
             #
-            # np.exp() ensures this remains positive.
+            # np.exp() guarantees that lead demand remains positive.
             base_monthly_leads = float(
                 np.exp(
                     math.log(25)
@@ -234,33 +303,39 @@ def generate_dealers(
                 )
             )
 
-            # Probability that a lead becomes an application.
+            # ---------------------------------------------------------
+            # FUNNEL CONVERSION PROBABILITIES
+            # ---------------------------------------------------------
+            #
+            # Overall quality has some influence, but stage-specific
+            # variation now has greater importance than in the first
+            # generator version.
+
             application_rate = sigmoid(
                 -0.95
-                + 0.30 * quality
+                + 0.18 * quality
                 + app_noise
             )
 
-            # Probability that an application is approved.
             approval_rate = sigmoid(
                 0.60
-                + 0.25 * quality
+                + 0.15 * quality
                 + approval_noise
             )
 
-            # Probability that an approved application results in a sale.
             sale_conversion_rate = sigmoid(
                 0.15
-                + 0.30 * quality
+                + 0.18 * quality
                 + sales_noise
             )
 
-            # Dealer-specific long-term monthly trend.
+            # ---------------------------------------------------------
+            # LONG-TERM DEALER TREND
+            # ---------------------------------------------------------
             #
-            # Positive values represent gradual growth.
-            # Negative values represent gradual decline.
-            #
-            # Most values are intentionally small.
+            # Small positive values indicate gradual growth.
+            # Small negative values indicate gradual decline.
+
             monthly_trend = float(
                 rng.normal(
                     loc=0.0,
@@ -269,18 +344,49 @@ def generate_dealers(
             )
 
             # ---------------------------------------------------------
-            # VISIBLE DEALER RECORD
+            # DEALER-SPECIFIC TRANSACTION VALUE
+            # ---------------------------------------------------------
+            #
+            # Previously every dealer used essentially the same price
+            # distribution. This caused:
+            #
+            #     sales count <-> revenue correlation ~= 1.0
+            #
+            # Giving dealers different average transaction values makes
+            # revenue a distinct analytical metric rather than simply
+            # another representation of sales volume.
+
+            average_sale_value = float(
+                np.exp(
+                    math.log(14_000)
+                    + 0.08 * quality
+                    + value_noise
+                )
+            )
+
+            # ---------------------------------------------------------
+            # VISIBLE DEALER TABLE
             # ---------------------------------------------------------
 
             dealer_rows.append(
                 {
-                    "dealer_id": dealer_id,
-                    "dealer_name": (
-                        f"{country}-Dealer-{index + 1:03d}"
-                    ),
-                    "country": country,
-                    "city": city,
-                    "active": True,
+                    "dealer_id":
+                        dealer_id,
+
+                    "dealer_name":
+                        (
+                            f"{country}-Dealer-"
+                            f"{index + 1:03d}"
+                        ),
+
+                    "country":
+                        country,
+
+                    "city":
+                        city,
+
+                    "active":
+                        True,
                 }
             )
 
@@ -290,25 +396,49 @@ def generate_dealers(
 
             truth_rows.append(
                 {
-                    "dealer_id": dealer_id,
-                    "latent_quality": quality,
-                    "base_monthly_leads": base_monthly_leads,
-                    "application_rate": application_rate,
-                    "approval_rate": approval_rate,
-                    "sale_conversion_rate": sale_conversion_rate,
-                    "monthly_trend": monthly_trend,
+                    "dealer_id":
+                        dealer_id,
+
+                    "latent_quality":
+                        quality,
+
+                    "base_monthly_leads":
+                        base_monthly_leads,
+
+                    "application_rate":
+                        application_rate,
+
+                    "approval_rate":
+                        approval_rate,
+
+                    "sale_conversion_rate":
+                        sale_conversion_rate,
+
+                    "monthly_trend":
+                        monthly_trend,
+
+                    "average_sale_value":
+                        average_sale_value,
                 }
             )
 
-    dealers = pd.DataFrame(dealer_rows)
-    dealer_truth = pd.DataFrame(truth_rows)
+    dealers = pd.DataFrame(
+        dealer_rows
+    )
 
-    return dealers, dealer_truth
+    dealer_truth = pd.DataFrame(
+        truth_rows
+    )
+
+    return (
+        dealers,
+        dealer_truth,
+    )
 
 
-# ---------------------------------------------------------------------
+# =====================================================================
 # LEAD GENERATION
-# ---------------------------------------------------------------------
+# =====================================================================
 
 
 def generate_leads(
@@ -318,76 +448,108 @@ def generate_leads(
     rng: np.random.Generator,
 ) -> pd.DataFrame:
     """
-    Generate synthetic lead events.
+    Generate individual lead events.
 
-    Monthly lead volume is influenced by:
+    Lead volume depends on:
 
     1. dealer-specific baseline demand
-    2. dealer-specific growth/decline trend
-    3. mild yearly seasonality
+    2. dealer-specific long-term trend
+    3. mild seasonal variation
     4. country-level simulation multiplier
     5. random Poisson variation
 
-    This gives us temporal and dealer-level heterogeneity while retaining
-    a known underlying data-generating process.
+    New leads are created only during the primary analysis window.
     """
 
     lead_rows: list[dict] = []
 
-    periods = generate_month_periods(
-        config
+    periods = (
+        generate_month_periods(
+            config
+        )
     )
 
-    # Makes dealer parameter lookup efficient.
-    truth_lookup = dealer_truth.set_index(
-        "dealer_id"
+    truth_lookup = (
+        dealer_truth
+        .set_index(
+            "dealer_id"
+        )
     )
 
     lead_counter = 0
 
-    for month_index, period_start in enumerate(periods):
+    for (
+        month_index,
+        period_start,
+    ) in enumerate(periods):
 
         period_end = (
             period_start
             + pd.offsets.MonthEnd(1)
         )
 
-        for dealer in dealers.itertuples(index=False):
+        for dealer in dealers.itertuples(
+            index=False
+        ):
 
             truth = truth_lookup.loc[
                 dealer.dealer_id
             ]
 
-            # Dealer-specific gradual change over time.
+            # ---------------------------------------------------------
+            # DEALER TREND
+            # ---------------------------------------------------------
+
             trend_factor = max(
                 0.65,
-                1.0
-                + float(
-                    truth["monthly_trend"]
-                )
-                * month_index,
+                (
+                    1.0
+                    + float(
+                        truth[
+                            "monthly_trend"
+                        ]
+                    )
+                    * month_index
+                ),
             )
 
-            month_seasonality = seasonal_factor(
-                period_start.month
+            # ---------------------------------------------------------
+            # SEASONAL EFFECT
+            # ---------------------------------------------------------
+
+            month_seasonality = (
+                seasonal_factor(
+                    period_start.month
+                )
             )
+
+            # ---------------------------------------------------------
+            # COUNTRY EFFECT
+            # ---------------------------------------------------------
 
             country_factor = (
-                config.country_demand_factor[
+                config
+                .country_demand_factor[
                     dealer.country
                 ]
             )
 
+            # ---------------------------------------------------------
+            # EXPECTED MONTHLY LEAD VOLUME
+            # ---------------------------------------------------------
+
             expected_leads = (
                 float(
-                    truth["base_monthly_leads"]
+                    truth[
+                        "base_monthly_leads"
+                    ]
                 )
                 * trend_factor
                 * month_seasonality
                 * country_factor
             )
 
-            # Poisson lambda must remain positive.
+            # Poisson lambda must always be positive.
             expected_leads = max(
                 expected_leads,
                 1.0,
@@ -400,18 +562,27 @@ def generate_leads(
             )
 
             days_in_month = (
-                period_end - period_start
+                period_end
+                - period_start
             ).days + 1
 
-            for _ in range(number_of_leads):
+            # ---------------------------------------------------------
+            # CREATE INDIVIDUAL LEADS
+            # ---------------------------------------------------------
+
+            for _ in range(
+                number_of_leads
+            ):
 
                 lead_counter += 1
 
-                lead_id = deterministic_uuid(
-                    f"lead:{lead_counter}"
+                lead_id = (
+                    deterministic_uuid(
+                        f"lead:{lead_counter}"
+                    )
                 )
 
-                # Choose a random day within the month.
+                # Random day within the current month.
                 day_offset = int(
                     rng.integers(
                         low=0,
@@ -428,15 +599,24 @@ def generate_leads(
 
                 lead_rows.append(
                     {
-                        "lead_id": lead_id,
-                        "dealer_id": dealer.dealer_id,
-                        "country": dealer.country,
-                        "lead_date": lead_date.date(),
-                        "lead_source": str(
-                            rng.choice(
-                                LEAD_SOURCES
-                            )
-                        ),
+                        "lead_id":
+                            lead_id,
+
+                        "dealer_id":
+                            dealer.dealer_id,
+
+                        "country":
+                            dealer.country,
+
+                        "lead_date":
+                            lead_date.date(),
+
+                        "lead_source":
+                            str(
+                                rng.choice(
+                                    LEAD_SOURCES
+                                )
+                            ),
                     }
                 )
 
@@ -445,9 +625,9 @@ def generate_leads(
     )
 
 
-# ---------------------------------------------------------------------
+# =====================================================================
 # APPLICATION GENERATION
-# ---------------------------------------------------------------------
+# =====================================================================
 
 
 def generate_applications(
@@ -457,54 +637,72 @@ def generate_applications(
     rng: np.random.Generator,
 ) -> pd.DataFrame:
     """
-    Convert a subset of leads into loan/application events.
+    Convert a subset of leads into applications.
 
-    Important improvement over the previous project:
-    every application references an actual lead_id.
+    Every application references a real lead.
 
-    Therefore we now have a real relationship:
+    Therefore the data contains an actual relationship:
 
-        Lead -> Application
+        Dealer
+          -> Lead
+              -> Application
 
-    The application conversion probability comes from the hidden dealer
-    parameters rather than being independently generated.
+    Late-December leads may generate applications during January 2026
+    because the simulation contains a maturation buffer.
     """
 
     application_rows: list[dict] = []
 
-    truth_lookup = dealer_truth.set_index(
-        "dealer_id"
+    truth_lookup = (
+        dealer_truth
+        .set_index(
+            "dealer_id"
+        )
     )
 
-    dataset_end = pd.Timestamp(
-        config.end_date
+    # Downstream events may occur during the maturation buffer.
+    simulation_end = pd.Timestamp(
+        config.simulation_end_date
     )
 
     application_counter = 0
 
-    for lead in leads.itertuples(index=False):
+    for lead in leads.itertuples(
+        index=False
+    ):
 
         truth = truth_lookup.loc[
             lead.dealer_id
         ]
 
         application_probability = float(
-            truth["application_rate"]
+            truth[
+                "application_rate"
+            ]
         )
 
-        # Determine whether this lead becomes an application.
-        if rng.random() >= application_probability:
+        # -------------------------------------------------------------
+        # DOES THIS LEAD APPLY?
+        # -------------------------------------------------------------
+
+        if (
+            rng.random()
+            >= application_probability
+        ):
             continue
 
         lead_date = pd.Timestamp(
             lead.lead_date
         )
 
-        # Applications may occur several days after initial lead capture.
+        # Application may happen on the same day or up to 10 days later.
         delay_days = int(
             rng.integers(
-                0,
-                MAX_APPLICATION_DELAY_DAYS + 1,
+                low=0,
+                high=(
+                    MAX_APPLICATION_DELAY_DAYS
+                    + 1
+                ),
             )
         )
 
@@ -515,45 +713,66 @@ def generate_applications(
             )
         )
 
-        # Prevent events outside the defined research observation window.
-        #
-        # This creates a small amount of right-censoring near the final
-        # dataset date. We will explicitly examine this during EDA.
-        if application_date > dataset_end:
+        # The buffer is large enough for valid applications generated
+        # from leads inside the analysis window.
+        if (
+            application_date
+            > simulation_end
+        ):
             continue
 
         application_counter += 1
 
-        application_id = deterministic_uuid(
-            f"application:{application_counter}"
+        application_id = (
+            deterministic_uuid(
+                f"application:"
+                f"{application_counter}"
+            )
         )
 
-        # Determine whether the application is approved.
+        # -------------------------------------------------------------
+        # APPROVAL DECISION
+        # -------------------------------------------------------------
+
         approved = (
             rng.random()
             < float(
-                truth["approval_rate"]
+                truth[
+                    "approval_rate"
+                ]
             )
         )
 
         application_rows.append(
             {
-                "application_id": application_id,
-                "lead_id": lead.lead_id,
-                "dealer_id": lead.dealer_id,
-                "country": lead.country,
+                "application_id":
+                    application_id,
+
+                "lead_id":
+                    lead.lead_id,
+
+                "dealer_id":
+                    lead.dealer_id,
+
+                "country":
+                    lead.country,
+
                 "application_date":
                     application_date.date(),
-                "application_channel": str(
-                    rng.choice(
-                        APPLICATION_CHANNELS
-                    )
-                ),
-                "status": (
-                    "approved"
-                    if approved
-                    else "rejected"
-                ),
+
+                "application_channel":
+                    str(
+                        rng.choice(
+                            APPLICATION_CHANNELS
+                        )
+                    ),
+
+                "status":
+                    (
+                        "approved"
+                        if approved
+                        else "rejected"
+                    ),
             }
         )
 
@@ -562,9 +781,9 @@ def generate_applications(
     )
 
 
-# ---------------------------------------------------------------------
+# =====================================================================
 # SALES GENERATION
-# ---------------------------------------------------------------------
+# =====================================================================
 
 
 def generate_sales(
@@ -574,43 +793,50 @@ def generate_sales(
     rng: np.random.Generator,
 ) -> pd.DataFrame:
     """
-    Generate vehicle sales from approved applications.
+    Generate sales from approved applications.
 
-    Every generated sale references:
+    Only approved applications can produce sales.
+
+    Every sale keeps references to:
 
         application_id
         lead_id
         dealer_id
 
-    giving us a complete traceable funnel:
+    giving us the complete observable funnel:
 
-        Lead
-          -> Application
-              -> Approved Application
-                  -> Sale
-
-    Only approved applications are eligible to produce sales.
+        Dealer
+          -> Lead
+              -> Application
+                  -> Approval
+                      -> Sale
     """
 
     sale_rows: list[dict] = []
 
-    truth_lookup = dealer_truth.set_index(
-        "dealer_id"
+    truth_lookup = (
+        dealer_truth
+        .set_index(
+            "dealer_id"
+        )
     )
 
-    dataset_end = pd.Timestamp(
-        config.end_date
+    simulation_end = pd.Timestamp(
+        config.simulation_end_date
     )
 
     sale_counter = 0
 
+    # Only approved applications can become sales.
     approved_apps = applications[
         applications["status"]
         == "approved"
     ].copy()
 
-    for application in approved_apps.itertuples(
-        index=False
+    for application in (
+        approved_apps.itertuples(
+            index=False
+        )
     ):
 
         truth = truth_lookup.loc[
@@ -623,8 +849,14 @@ def generate_sales(
             ]
         )
 
-        # Determine whether the approved application becomes a sale.
-        if rng.random() >= sale_probability:
+        # -------------------------------------------------------------
+        # DOES THE APPROVED APPLICATION CONVERT?
+        # -------------------------------------------------------------
+
+        if (
+            rng.random()
+            >= sale_probability
+        ):
             continue
 
         application_date = pd.Timestamp(
@@ -633,8 +865,11 @@ def generate_sales(
 
         sale_delay_days = int(
             rng.integers(
-                0,
-                MAX_SALE_DELAY_DAYS + 1,
+                low=0,
+                high=(
+                    MAX_SALE_DELAY_DAYS
+                    + 1
+                ),
             )
         )
 
@@ -645,25 +880,39 @@ def generate_sales(
             )
         )
 
-        # Prevent sales outside the research observation window.
-        if sale_date > dataset_end:
+        if sale_date > simulation_end:
             continue
 
         sale_counter += 1
 
-        sale_id = deterministic_uuid(
-            f"sale:{sale_counter}"
+        sale_id = (
+            deterministic_uuid(
+                f"sale:{sale_counter}"
+            )
         )
 
-        # Vehicle sale value follows a log-normal distribution.
+        # -------------------------------------------------------------
+        # SALE VALUE
+        # -------------------------------------------------------------
         #
-        # Log-normal values are useful here because prices are positive
-        # and naturally right-skewed rather than normally distributed.
+        # Each dealer has its own hidden typical transaction value.
+        #
+        # Individual transactions then vary around that dealer-specific
+        # average using a log-normal distribution.
+
+        dealer_average_sale_value = float(
+            truth[
+                "average_sale_value"
+            ]
+        )
+
         sale_amount_usd = float(
             np.clip(
                 rng.lognormal(
-                    mean=math.log(14_000),
-                    sigma=0.35,
+                    mean=math.log(
+                        dealer_average_sale_value
+                    ),
+                    sigma=0.25,
                 ),
                 4_000,
                 60_000,
@@ -672,27 +921,36 @@ def generate_sales(
 
         sale_rows.append(
             {
-                "sale_id": sale_id,
+                "sale_id":
+                    sale_id,
+
                 "application_id":
                     application.application_id,
+
                 "lead_id":
                     application.lead_id,
+
                 "dealer_id":
                     application.dealer_id,
+
                 "country":
                     application.country,
+
                 "sale_date":
                     sale_date.date(),
+
                 "sale_amount_usd":
                     round(
                         sale_amount_usd,
                         2,
                     ),
-                "financing_bank": str(
-                    rng.choice(
-                        FINANCING_BANKS
-                    )
-                ),
+
+                "financing_bank":
+                    str(
+                        rng.choice(
+                            FINANCING_BANKS
+                        )
+                    ),
             }
         )
 
@@ -701,9 +959,9 @@ def generate_sales(
     )
 
 
-# ---------------------------------------------------------------------
-# DATASET SAVING
-# ---------------------------------------------------------------------
+# =====================================================================
+# SAVE DATASET
+# =====================================================================
 
 
 def save_dataset(
@@ -715,27 +973,19 @@ def save_dataset(
     sales: pd.DataFrame,
 ) -> None:
     """
-    Save visible research data, hidden simulation truth, and metadata.
+    Save visible datasets, hidden truth, and metadata.
 
-    Visible datasets
-    ----------------
-    Saved in:
+    Visible experimental data:
+        data/generated/v2/
 
-        data/generated/
+    Hidden researcher-only truth:
+        data/research_truth/v2/
 
-    These datasets may eventually be loaded into PostgreSQL.
-
-    Hidden truth
-    ------------
-    Saved in:
-
-        data/research_truth/
-
-    This information is for researchers only and must NOT be exposed to
-    either experimental system.
+    Metadata:
+        metadata/
     """
 
-    # Create directories if they do not yet exist.
+    # Create directories when they do not already exist.
     config.output_dir.mkdir(
         parents=True,
         exist_ok=True,
@@ -751,18 +1001,28 @@ def save_dataset(
         exist_ok=True,
     )
 
-    # ---------------------------------------------------------
-    # SAVE VISIBLE DATA
-    # ---------------------------------------------------------
+    # -------------------------------------------------------------
+    # VISIBLE DATA
+    # -------------------------------------------------------------
 
     visible_datasets = {
-        "dealers": dealers,
-        "leads": leads,
-        "applications": applications,
-        "sales": sales,
+        "dealers":
+            dealers,
+
+        "leads":
+            leads,
+
+        "applications":
+            applications,
+
+        "sales":
+            sales,
     }
 
-    for dataset_name, dataframe in visible_datasets.items():
+    for (
+        dataset_name,
+        dataframe,
+    ) in visible_datasets.items():
 
         output_path = (
             config.output_dir
@@ -774,19 +1034,35 @@ def save_dataset(
             index=False,
         )
 
-    # ---------------------------------------------------------
-    # SAVE HIDDEN SIMULATION TRUTH
-    # ---------------------------------------------------------
+    # -------------------------------------------------------------
+    # HIDDEN RESEARCH TRUTH
+    # -------------------------------------------------------------
 
     dealer_truth.to_csv(
-        config.truth_dir
-        / "dealer_latent_truth.csv",
+        (
+            config.truth_dir
+            / "dealer_latent_truth.csv"
+        ),
         index=False,
     )
 
-    # ---------------------------------------------------------
-    # SAVE DATASET METADATA
-    # ---------------------------------------------------------
+    # -------------------------------------------------------------
+    # METADATA
+    # -------------------------------------------------------------
+
+    approved_count = int(
+        (
+            applications["status"]
+            == "approved"
+        ).sum()
+    )
+
+    rejected_count = int(
+        (
+            applications["status"]
+            == "rejected"
+        ).sum()
+    )
 
     metadata = {
         "generator_version":
@@ -798,12 +1074,17 @@ def save_dataset(
         "start_date":
             config.start_date,
 
-        "end_date":
-            config.end_date,
+        "analysis_end_date":
+            config.analysis_end_date,
+
+        "simulation_end_date":
+            config.simulation_end_date,
 
         "countries":
             list(
-                config.dealers_per_country.keys()
+                config
+                .dealers_per_country
+                .keys()
             ),
 
         "dealer_count":
@@ -822,32 +1103,23 @@ def save_dataset(
             ),
 
         "approved_application_count":
-            int(
-                (
-                    applications["status"]
-                    == "approved"
-                ).sum()
-            ),
+            approved_count,
 
         "rejected_application_count":
-            int(
-                (
-                    applications["status"]
-                    == "rejected"
-                ).sum()
-            ),
+            rejected_count,
 
         "sale_count":
             int(
                 len(sales)
             ),
 
-        # Explicit methodological note.
         "note": (
-            "This dataset is synthetic. "
-            "Country-level demand multipliers and behavioural "
-            "relationships are simulation parameters and are not "
-            "empirical claims about real automotive markets."
+            "This dataset is fully synthetic. "
+            "Country demand multipliers, dealer characteristics, "
+            "conversion probabilities, transaction values, and temporal "
+            "relationships are simulation parameters and must not be "
+            "interpreted as empirical claims about real automotive "
+            "markets."
         ),
     }
 
@@ -860,6 +1132,7 @@ def save_dataset(
         "w",
         encoding="utf-8",
     ) as file:
+
         json.dump(
             metadata,
             file,
@@ -867,9 +1140,9 @@ def save_dataset(
         )
 
 
-# ---------------------------------------------------------------------
+# =====================================================================
 # MASTER GENERATION PIPELINE
-# ---------------------------------------------------------------------
+# =====================================================================
 
 
 def generate_dataset(
@@ -882,41 +1155,49 @@ def generate_dataset(
     pd.DataFrame,
 ]:
     """
-    Run the complete synthetic dataset generation pipeline.
+    Run the complete synthetic-data generation process.
 
     Pipeline
     --------
 
-        Dealer population
-                |
-                v
-             Leads
-                |
-                v
-          Applications
-                |
-                v
-         Approved Apps
-                |
-                v
-             Sales
+        Dealers
+            |
+            v
+         Leads
+            |
+            v
+      Applications
+            |
+            v
+        Approvals
+            |
+            v
+         Sales
 
-    The same random seed will reproduce the same dataset.
+    The same seed and generator version should reproduce the same data.
     """
 
-    # One random number generator is passed through the complete
-    # simulation. This keeps the full experiment reproducible.
+    # Use a single controlled RNG for the complete simulation.
     rng = np.random.default_rng(
         config.seed
     )
 
-    # 1. Generate dealers and hidden dealer characteristics.
-    dealers, dealer_truth = generate_dealers(
+    # -------------------------------------------------------------
+    # 1. DEALERS
+    # -------------------------------------------------------------
+
+    (
+        dealers,
+        dealer_truth,
+    ) = generate_dealers(
         config=config,
         rng=rng,
     )
 
-    # 2. Generate customer leads.
+    # -------------------------------------------------------------
+    # 2. LEADS
+    # -------------------------------------------------------------
+
     leads = generate_leads(
         config=config,
         dealers=dealers,
@@ -924,7 +1205,10 @@ def generate_dataset(
         rng=rng,
     )
 
-    # 3. Convert a subset of leads into applications.
+    # -------------------------------------------------------------
+    # 3. APPLICATIONS
+    # -------------------------------------------------------------
+
     applications = generate_applications(
         config=config,
         leads=leads,
@@ -932,7 +1216,10 @@ def generate_dataset(
         rng=rng,
     )
 
-    # 4. Convert approved applications into sales.
+    # -------------------------------------------------------------
+    # 4. SALES
+    # -------------------------------------------------------------
+
     sales = generate_sales(
         config=config,
         applications=applications,
@@ -940,7 +1227,10 @@ def generate_dataset(
         rng=rng,
     )
 
-    # 5. Save all visible and hidden datasets.
+    # -------------------------------------------------------------
+    # 5. SAVE
+    # -------------------------------------------------------------
+
     save_dataset(
         config=config,
         dealers=dealers,
@@ -959,9 +1249,9 @@ def generate_dataset(
     )
 
 
-# ---------------------------------------------------------------------
-# TEMPORARY DEVELOPMENT OUTPUT
-# ---------------------------------------------------------------------
+# =====================================================================
+# DEVELOPMENT SUMMARY
+# =====================================================================
 
 
 def print_dataset_summary(
@@ -972,55 +1262,87 @@ def print_dataset_summary(
     sales: pd.DataFrame,
 ) -> None:
     """
-    Print basic information while developing the generator.
+    Print basic information after data generation.
 
-    These checks are NOT our final research validation.
-    A separate validation module will perform rigorous checks later.
+    These are convenience checks only.
+
+    Formal integrity checking belongs in validation.py.
     """
 
-    print("\n" + "=" * 60)
-    print("SYNTHETIC DEALER ANALYTICS DATASET")
-    print("=" * 60)
+    print(
+        "\n"
+        + "=" * 70
+    )
 
-    print("\nSample dealers:")
+    print(
+        "SYNTHETIC DEALER ANALYTICS DATASET"
+    )
+
+    print(
+        "=" * 70
+    )
+
+    print(
+        "\nSample dealers:"
+    )
     print(
         dealers.head()
     )
 
-    print("\nSample hidden dealer truth:")
+    print(
+        "\nSample hidden dealer truth:"
+    )
     print(
         dealer_truth.head()
     )
 
-    print("\nSample leads:")
+    print(
+        "\nSample leads:"
+    )
     print(
         leads.head()
     )
 
-    print("\nSample applications:")
+    print(
+        "\nSample applications:"
+    )
     print(
         applications.head()
     )
 
-    print("\nSample sales:")
+    print(
+        "\nSample sales:"
+    )
     print(
         sales.head()
     )
 
-    print("\n" + "-" * 60)
-    print("DATASET COUNTS")
-    print("-" * 60)
-
     print(
-        f"Dealers:      {len(dealers):,}"
+        "\n"
+        + "-" * 70
     )
 
     print(
-        f"Leads:        {len(leads):,}"
+        "DATASET COUNTS"
     )
 
     print(
-        f"Applications: {len(applications):,}"
+        "-" * 70
+    )
+
+    print(
+        f"Dealers:      "
+        f"{len(dealers):,}"
+    )
+
+    print(
+        f"Leads:        "
+        f"{len(leads):,}"
+    )
+
+    print(
+        f"Applications: "
+        f"{len(applications):,}"
     )
 
     approved_count = int(
@@ -1038,20 +1360,32 @@ def print_dataset_summary(
     )
 
     print(
-        f"Approved:     {approved_count:,}"
+        f"Approved:     "
+        f"{approved_count:,}"
     )
 
     print(
-        f"Rejected:     {rejected_count:,}"
+        f"Rejected:     "
+        f"{rejected_count:,}"
     )
 
     print(
-        f"Sales:        {len(sales):,}"
+        f"Sales:        "
+        f"{len(sales):,}"
     )
 
-    print("\n" + "-" * 60)
-    print("DATE RANGE")
-    print("-" * 60)
+    print(
+        "\n"
+        + "-" * 70
+    )
+
+    print(
+        "DATE RANGE"
+    )
+
+    print(
+        "-" * 70
+    )
 
     print(
         "Lead dates:",
@@ -1073,62 +1407,96 @@ def print_dataset_summary(
 
     print(
         "Sale dates:",
-        sales["sale_date"].min(),
+        sales[
+            "sale_date"
+        ].min(),
         "to",
-        sales["sale_date"].max(),
+        sales[
+            "sale_date"
+        ].max(),
     )
 
-    print("\n" + "-" * 60)
-    print("LEADS BY COUNTRY")
-    print("-" * 60)
+    print(
+        "\n"
+        + "-" * 70
+    )
+
+    print(
+        "LEADS BY COUNTRY"
+    )
+
+    print(
+        "-" * 70
+    )
 
     print(
         leads
-        .groupby("country")
+        .groupby(
+            "country"
+        )
         .size()
         .sort_values(
             ascending=False
         )
     )
 
-    print("\n" + "-" * 60)
-    print("BASIC DUPLICATE CHECK")
-    print("-" * 60)
+    print(
+        "\n"
+        + "-" * 70
+    )
+
+    print(
+        "DUPLICATE IDENTIFIER CHECK"
+    )
+
+    print(
+        "-" * 70
+    )
 
     print(
         "Duplicate dealer IDs:",
         dealers[
             "dealer_id"
-        ].duplicated().sum(),
+        ]
+        .duplicated()
+        .sum(),
     )
 
     print(
         "Duplicate lead IDs:",
         leads[
             "lead_id"
-        ].duplicated().sum(),
+        ]
+        .duplicated()
+        .sum(),
     )
 
     print(
         "Duplicate application IDs:",
         applications[
             "application_id"
-        ].duplicated().sum(),
+        ]
+        .duplicated()
+        .sum(),
     )
 
     print(
         "Duplicate sale IDs:",
         sales[
             "sale_id"
-        ].duplicated().sum(),
+        ]
+        .duplicated()
+        .sum(),
     )
 
-    print("\nGeneration completed.")
+    print(
+        "\nGeneration completed."
+    )
 
 
-# ---------------------------------------------------------------------
-# RUN THIS FILE DIRECTLY AS A MODULE
-# ---------------------------------------------------------------------
+# =====================================================================
+# MODULE ENTRY POINT
+# =====================================================================
 
 if __name__ == "__main__":
 

@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import (
+    asdict,
+    dataclass,
+)
 from pathlib import Path
 
 import pandas as pd
@@ -9,24 +12,17 @@ import pandas as pd
 from .config import SimulationConfig
 
 
-# ---------------------------------------------------------------------
-# VALIDATION RESULT
-# ---------------------------------------------------------------------
+# =====================================================================
+# VALIDATION RESULT OBJECT
+# =====================================================================
 
 
 @dataclass
 class ValidationCheck:
     """
-    Represents the outcome of one dataset validation rule.
+    Result of one dataset-integrity check.
 
-    name:
-        Short identifier for the check.
-
-    passed:
-        True if the dataset satisfies the rule.
-
-    details:
-        Human-readable explanation of what was tested.
+    passed=True means the rule was satisfied.
     """
 
     name: str
@@ -34,9 +30,9 @@ class ValidationCheck:
     details: str
 
 
-# ---------------------------------------------------------------------
-# HELPER FUNCTIONS
-# ---------------------------------------------------------------------
+# =====================================================================
+# VALIDATION HELPERS
+# =====================================================================
 
 
 def add_check(
@@ -46,8 +42,9 @@ def add_check(
     details: str,
 ) -> None:
     """
-    Add one validation result to the list.
+    Store a validation result.
     """
+
     checks.append(
         ValidationCheck(
             name=name,
@@ -64,24 +61,32 @@ def require_columns(
     checks: list[ValidationCheck],
 ) -> None:
     """
-    Verify that a dataframe contains all columns required by the
-    research data model.
+    Confirm that a dataframe contains its required schema.
     """
 
     missing_columns = (
         required_columns
-        - set(dataframe.columns)
+        - set(
+            dataframe.columns
+        )
     )
-
-    passed = len(missing_columns) == 0
 
     add_check(
         checks=checks,
-        name=f"{dataframe_name}_required_columns",
-        passed=passed,
+        name=(
+            f"{dataframe_name}"
+            f"_required_columns"
+        ),
+        passed=(
+            len(
+                missing_columns
+            )
+            == 0
+        ),
         details=(
             f"{dataframe_name}: "
-            f"missing columns = {sorted(missing_columns)}"
+            f"missing columns = "
+            f"{sorted(missing_columns)}"
         ),
     )
 
@@ -93,22 +98,33 @@ def check_unique_column(
     checks: list[ValidationCheck],
 ) -> None:
     """
-    Verify that an identifier column is unique.
+    Verify that an identifier expected to be unique contains no
+    duplicates.
     """
 
     duplicate_count = int(
-        dataframe[column]
+        dataframe[
+            column
+        ]
         .duplicated()
         .sum()
     )
 
     add_check(
         checks=checks,
-        name=f"{dataframe_name}_{column}_unique",
-        passed=duplicate_count == 0,
+        name=(
+            f"{dataframe_name}_"
+            f"{column}_unique"
+        ),
+        passed=(
+            duplicate_count
+            == 0
+        ),
         details=(
-            f"{dataframe_name}.{column}: "
-            f"{duplicate_count} duplicate values"
+            f"{dataframe_name}."
+            f"{column}: "
+            f"{duplicate_count} "
+            f"duplicate values"
         ),
     )
 
@@ -120,14 +136,22 @@ def check_required_nulls(
     checks: list[ValidationCheck],
 ) -> None:
     """
-    Verify that required fields contain no missing values.
+    Confirm that mandatory variables do not contain missing values.
 
-    We do NOT replace missing values with zero here.
-    Missing and zero have different analytical meanings.
+    Missing values are NOT automatically replaced.
+
+    In research data:
+
+        missing != zero
+
+    so silently converting one to the other would be methodologically
+    unsafe.
     """
 
     null_counts = (
-        dataframe[required_columns]
+        dataframe[
+            required_columns
+        ]
         .isna()
         .sum()
     )
@@ -137,26 +161,36 @@ def check_required_nulls(
     )
 
     details = {
-        column: int(count)
-        for column, count
-        in null_counts.items()
+        column:
+            int(count)
+        for (
+            column,
+            count,
+        ) in null_counts.items()
         if count > 0
     }
 
     add_check(
         checks=checks,
-        name=f"{dataframe_name}_required_nulls",
-        passed=total_nulls == 0,
+        name=(
+            f"{dataframe_name}"
+            f"_required_nulls"
+        ),
+        passed=(
+            total_nulls
+            == 0
+        ),
         details=(
             f"{dataframe_name}: "
-            f"missing required values = {details}"
+            f"missing required values = "
+            f"{details}"
         ),
     )
 
 
-# ---------------------------------------------------------------------
-# MAIN DATASET VALIDATION
-# ---------------------------------------------------------------------
+# =====================================================================
+# MAIN VALIDATION PIPELINE
+# =====================================================================
 
 
 def validate_dataset(
@@ -168,30 +202,21 @@ def validate_dataset(
     sales: pd.DataFrame,
 ) -> list[ValidationCheck]:
     """
-    Validate the complete synthetic dealer analytics dataset.
+    Validate the complete synthetic dataset.
 
-    The function checks:
+    Validation tests structural integrity only.
 
-    1. required columns
-    2. unique identifiers
-    3. missing required values
-    4. country validity
-    5. observation-window validity
-    6. foreign-key integrity
-    7. chronological consistency
-    8. application-status validity
-    9. sale eligibility
-    10. dealer/country consistency
-    11. hidden research-truth coverage
-
-    No data is modified.
+    It does NOT determine whether the simulation is statistically
+    realistic. That is handled separately during EDA.
     """
 
-    checks: list[ValidationCheck] = []
+    checks: list[
+        ValidationCheck
+    ] = []
 
-    # ================================================================
+    # =================================================================
     # 1. REQUIRED COLUMNS
-    # ================================================================
+    # =================================================================
 
     dealer_columns = {
         "dealer_id",
@@ -209,6 +234,7 @@ def validate_dataset(
         "approval_rate",
         "sale_conversion_rate",
         "monthly_trend",
+        "average_sale_value",
     }
 
     lead_columns = {
@@ -275,14 +301,21 @@ def validate_dataset(
         checks,
     )
 
-    # ================================================================
-    # 2. UNIQUE PRIMARY IDENTIFIERS
-    # ================================================================
+    # =================================================================
+    # 2. UNIQUE IDENTIFIERS
+    # =================================================================
 
     check_unique_column(
         dealers,
         "dealer_id",
         "dealers",
+        checks,
+    )
+
+    check_unique_column(
+        dealer_truth,
+        "dealer_id",
+        "dealer_truth",
         checks,
     )
 
@@ -307,9 +340,26 @@ def validate_dataset(
         checks,
     )
 
-    # ================================================================
-    # 3. REQUIRED VALUES MUST NOT BE NULL
-    # ================================================================
+    # A lead may generate at most one application in our current
+    # simulation model.
+    check_unique_column(
+        applications,
+        "lead_id",
+        "applications",
+        checks,
+    )
+
+    # An approved application may generate at most one sale.
+    check_unique_column(
+        sales,
+        "application_id",
+        "sales",
+        checks,
+    )
+
+    # =================================================================
+    # 3. REQUIRED VALUES
+    # =================================================================
 
     check_required_nulls(
         dealers,
@@ -321,6 +371,22 @@ def validate_dataset(
             "active",
         ],
         "dealers",
+        checks,
+    )
+
+    check_required_nulls(
+        dealer_truth,
+        [
+            "dealer_id",
+            "latent_quality",
+            "base_monthly_leads",
+            "application_rate",
+            "approval_rate",
+            "sale_conversion_rate",
+            "monthly_trend",
+            "average_sale_value",
+        ],
+        "dealer_truth",
         checks,
     )
 
@@ -368,15 +434,20 @@ def validate_dataset(
         checks,
     )
 
-    # ================================================================
+    # =================================================================
     # 4. COUNTRY VALIDITY
-    # ================================================================
+    # =================================================================
 
     valid_countries = set(
-        config.dealers_per_country.keys()
+        config
+        .dealers_per_country
+        .keys()
     )
 
-    for name, dataframe in [
+    for (
+        name,
+        dataframe,
+    ) in [
         ("dealers", dealers),
         ("leads", leads),
         ("applications", applications),
@@ -384,7 +455,9 @@ def validate_dataset(
     ]:
 
         observed = set(
-            dataframe["country"]
+            dataframe[
+                "country"
+            ]
             .dropna()
             .unique()
         )
@@ -396,32 +469,100 @@ def validate_dataset(
 
         add_check(
             checks=checks,
-            name=f"{name}_valid_countries",
-            passed=len(invalid) == 0,
+            name=(
+                f"{name}"
+                f"_valid_countries"
+            ),
+            passed=(
+                len(invalid)
+                == 0
+            ),
             details=(
                 f"{name}: "
-                f"invalid countries = {sorted(invalid)}"
+                f"invalid countries = "
+                f"{sorted(invalid)}"
             ),
         )
 
-    # ================================================================
+    # =================================================================
     # 5. DATE WINDOW VALIDITY
-    # ================================================================
+    # =================================================================
 
     start_date = pd.Timestamp(
         config.start_date
     )
 
-    end_date = pd.Timestamp(
-        config.end_date
+    analysis_end_date = pd.Timestamp(
+        config.analysis_end_date
     )
 
-    date_checks = [
+    simulation_end_date = pd.Timestamp(
+        config.simulation_end_date
+    )
+
+    # -------------------------------------------------------------
+    # LEADS
+    # -------------------------------------------------------------
+    #
+    # Leads must exist only in the primary analysis window.
+
+    lead_dates = pd.to_datetime(
+        leads[
+            "lead_date"
+        ],
+        errors="coerce",
+    )
+
+    invalid_lead_dates = int(
+        lead_dates
+        .isna()
+        .sum()
+    )
+
+    leads_outside_window = int(
         (
-            "leads",
-            leads,
-            "lead_date",
+            (
+                lead_dates
+                < start_date
+            )
+            |
+            (
+                lead_dates
+                > analysis_end_date
+            )
+        ).sum()
+    )
+
+    add_check(
+        checks=checks,
+        name="leads_valid_dates",
+        passed=(
+            invalid_lead_dates
+            == 0
+            and
+            leads_outside_window
+            == 0
         ),
+        details=(
+            "leads.lead_date: "
+            f"{invalid_lead_dates} "
+            "invalid dates, "
+            f"{leads_outside_window} "
+            "outside analysis window"
+        ),
+    )
+
+    # -------------------------------------------------------------
+    # APPLICATIONS AND SALES
+    # -------------------------------------------------------------
+    #
+    # These events are allowed to mature during January 2026.
+
+    for (
+        name,
+        dataframe,
+        date_column,
+    ) in [
         (
             "applications",
             applications,
@@ -432,147 +573,226 @@ def validate_dataset(
             sales,
             "sale_date",
         ),
-    ]
-
-    for name, dataframe, date_column in date_checks:
+    ]:
 
         dates = pd.to_datetime(
-            dataframe[date_column],
+            dataframe[
+                date_column
+            ],
             errors="coerce",
         )
 
         invalid_date_count = int(
-            dates.isna().sum()
+            dates
+            .isna()
+            .sum()
         )
 
         outside_window = int(
             (
-                (dates < start_date)
-                | (dates > end_date)
+                (
+                    dates
+                    < start_date
+                )
+                |
+                (
+                    dates
+                    > simulation_end_date
+                )
             ).sum()
         )
 
         add_check(
             checks=checks,
-            name=f"{name}_valid_dates",
+            name=(
+                f"{name}_valid_dates"
+            ),
             passed=(
-                invalid_date_count == 0
-                and outside_window == 0
+                invalid_date_count
+                == 0
+                and
+                outside_window
+                == 0
             ),
             details=(
                 f"{name}.{date_column}: "
-                f"{invalid_date_count} invalid dates, "
-                f"{outside_window} outside research window"
+                f"{invalid_date_count} "
+                "invalid dates, "
+                f"{outside_window} "
+                "outside simulation window"
             ),
         )
 
-    # ================================================================
-    # 6. FOREIGN-KEY INTEGRITY
-    # ================================================================
+    # =================================================================
+    # 6. FOREIGN KEY INTEGRITY
+    # =================================================================
 
     dealer_ids = set(
-        dealers["dealer_id"]
+        dealers[
+            "dealer_id"
+        ]
     )
 
     lead_ids = set(
-        leads["lead_id"]
+        leads[
+            "lead_id"
+        ]
     )
 
     application_ids = set(
-        applications["application_id"]
+        applications[
+            "application_id"
+        ]
     )
 
-    # Every lead must belong to a valid dealer.
+    # Leads -> Dealers
     invalid_lead_dealers = int(
-        (~leads["dealer_id"].isin(dealer_ids))
-        .sum()
+        (
+            ~leads[
+                "dealer_id"
+            ]
+            .isin(
+                dealer_ids
+            )
+        ).sum()
     )
 
     add_check(
         checks=checks,
-        name="leads_reference_existing_dealers",
-        passed=invalid_lead_dealers == 0,
+        name=(
+            "leads_reference_"
+            "existing_dealers"
+        ),
+        passed=(
+            invalid_lead_dealers
+            == 0
+        ),
         details=(
-            f"{invalid_lead_dealers} leads reference "
-            f"non-existent dealers"
+            f"{invalid_lead_dealers} "
+            "leads reference "
+            "non-existent dealers"
         ),
     )
 
-    # Every application must reference an existing lead.
+    # Applications -> Leads
     orphan_applications = int(
         (
-            ~applications["lead_id"]
-            .isin(lead_ids)
+            ~applications[
+                "lead_id"
+            ]
+            .isin(
+                lead_ids
+            )
         ).sum()
     )
 
     add_check(
         checks=checks,
-        name="applications_reference_existing_leads",
-        passed=orphan_applications == 0,
+        name=(
+            "applications_reference_"
+            "existing_leads"
+        ),
+        passed=(
+            orphan_applications
+            == 0
+        ),
         details=(
-            f"{orphan_applications} applications "
-            f"reference missing leads"
+            f"{orphan_applications} "
+            "applications reference "
+            "missing leads"
         ),
     )
 
-    # Every application must belong to a valid dealer.
+    # Applications -> Dealers
     invalid_application_dealers = int(
         (
-            ~applications["dealer_id"]
-            .isin(dealer_ids)
+            ~applications[
+                "dealer_id"
+            ]
+            .isin(
+                dealer_ids
+            )
         ).sum()
     )
 
     add_check(
         checks=checks,
-        name="applications_reference_existing_dealers",
-        passed=invalid_application_dealers == 0,
+        name=(
+            "applications_reference_"
+            "existing_dealers"
+        ),
+        passed=(
+            invalid_application_dealers
+            == 0
+        ),
         details=(
-            f"{invalid_application_dealers} applications "
-            f"reference missing dealers"
+            f"{invalid_application_dealers} "
+            "applications reference "
+            "missing dealers"
         ),
     )
 
-    # Every sale must reference an existing application.
+    # Sales -> Applications
     orphan_sales = int(
         (
-            ~sales["application_id"]
-            .isin(application_ids)
+            ~sales[
+                "application_id"
+            ]
+            .isin(
+                application_ids
+            )
         ).sum()
     )
 
     add_check(
         checks=checks,
-        name="sales_reference_existing_applications",
-        passed=orphan_sales == 0,
+        name=(
+            "sales_reference_"
+            "existing_applications"
+        ),
+        passed=(
+            orphan_sales
+            == 0
+        ),
         details=(
-            f"{orphan_sales} sales reference "
-            f"missing applications"
+            f"{orphan_sales} "
+            "sales reference "
+            "missing applications"
         ),
     )
 
-    # Every sale must reference an existing lead.
+    # Sales -> Leads
     invalid_sale_leads = int(
         (
-            ~sales["lead_id"]
-            .isin(lead_ids)
+            ~sales[
+                "lead_id"
+            ]
+            .isin(
+                lead_ids
+            )
         ).sum()
     )
 
     add_check(
         checks=checks,
-        name="sales_reference_existing_leads",
-        passed=invalid_sale_leads == 0,
+        name=(
+            "sales_reference_"
+            "existing_leads"
+        ),
+        passed=(
+            invalid_sale_leads
+            == 0
+        ),
         details=(
-            f"{invalid_sale_leads} sales reference "
-            f"missing leads"
+            f"{invalid_sale_leads} "
+            "sales reference "
+            "missing leads"
         ),
     )
 
-    # ================================================================
+    # =================================================================
     # 7. APPLICATION STATUS VALIDITY
-    # ================================================================
+    # =================================================================
 
     valid_statuses = {
         "approved",
@@ -580,7 +800,9 @@ def validate_dataset(
     }
 
     observed_statuses = set(
-        applications["status"]
+        applications[
+            "status"
+        ]
         .dropna()
         .unique()
     )
@@ -592,105 +814,151 @@ def validate_dataset(
 
     add_check(
         checks=checks,
-        name="application_status_validity",
-        passed=len(invalid_statuses) == 0,
+        name=(
+            "application_status_"
+            "validity"
+        ),
+        passed=(
+            len(
+                invalid_statuses
+            )
+            == 0
+        ),
         details=(
             "Invalid statuses = "
             f"{sorted(invalid_statuses)}"
         ),
     )
 
-    # ================================================================
+    # =================================================================
     # 8. SALES MUST COME FROM APPROVED APPLICATIONS
-    # ================================================================
+    # =================================================================
 
     application_status_lookup = (
         applications
-        .set_index("application_id")[
+        .set_index(
+            "application_id"
+        )[
             "status"
         ]
     )
 
     sale_statuses = (
-        sales["application_id"]
-        .map(application_status_lookup)
+        sales[
+            "application_id"
+        ]
+        .map(
+            application_status_lookup
+        )
     )
 
     sales_from_nonapproved = int(
         (
-            sale_statuses != "approved"
+            sale_statuses
+            != "approved"
         ).sum()
     )
 
     add_check(
         checks=checks,
-        name="sales_only_from_approved_applications",
-        passed=sales_from_nonapproved == 0,
+        name=(
+            "sales_only_from_"
+            "approved_applications"
+        ),
+        passed=(
+            sales_from_nonapproved
+            == 0
+        ),
         details=(
-            f"{sales_from_nonapproved} sales came from "
-            f"non-approved applications"
+            f"{sales_from_nonapproved} "
+            "sales came from "
+            "non-approved applications"
         ),
     )
 
-    # ================================================================
+    # =================================================================
     # 9. CHRONOLOGICAL CONSISTENCY
-    # ================================================================
+    # =================================================================
 
-    # Build lookup tables.
     lead_date_lookup = (
         leads
-        .set_index("lead_id")[
+        .set_index(
+            "lead_id"
+        )[
             "lead_date"
         ]
     )
 
     application_date_lookup = (
         applications
-        .set_index("application_id")[
+        .set_index(
+            "application_id"
+        )[
             "application_date"
         ]
     )
 
-    # ---------------------------------------------------------------
-    # Applications must occur on or after their associated lead.
-    # ---------------------------------------------------------------
+    # -------------------------------------------------------------
+    # APPLICATION DATE >= LEAD DATE
+    # -------------------------------------------------------------
 
-    app_lead_dates = pd.to_datetime(
-        applications["lead_id"]
-        .map(lead_date_lookup)
+    application_lead_dates = (
+        pd.to_datetime(
+            applications[
+                "lead_id"
+            ]
+            .map(
+                lead_date_lookup
+            )
+        )
     )
 
-    app_dates = pd.to_datetime(
-        applications["application_date"]
+    application_dates = pd.to_datetime(
+        applications[
+            "application_date"
+        ]
     )
 
     application_before_lead = int(
         (
-            app_dates < app_lead_dates
+            application_dates
+            < application_lead_dates
         ).sum()
     )
 
     add_check(
         checks=checks,
         name="application_after_lead",
-        passed=application_before_lead == 0,
+        passed=(
+            application_before_lead
+            == 0
+        ),
         details=(
-            f"{application_before_lead} applications "
-            f"occur before their associated lead"
+            f"{application_before_lead} "
+            "applications occur before "
+            "their originating lead"
         ),
     )
 
-    # ---------------------------------------------------------------
-    # Sales must occur on or after their associated application.
-    # ---------------------------------------------------------------
+    # -------------------------------------------------------------
+    # SALE DATE >= APPLICATION DATE
+    # -------------------------------------------------------------
 
-    sale_application_dates = pd.to_datetime(
-        sales["application_id"]
-        .map(application_date_lookup)
+    sale_application_dates = (
+        pd.to_datetime(
+            sales[
+                "application_id"
+            ]
+            .map(
+                application_date_lookup
+            )
+        )
     )
 
     sale_dates = pd.to_datetime(
-        sales["sale_date"]
+        sales[
+            "sale_date"
+        ]
     )
 
     sale_before_application = int(
@@ -703,151 +971,222 @@ def validate_dataset(
     add_check(
         checks=checks,
         name="sale_after_application",
-        passed=sale_before_application == 0,
+        passed=(
+            sale_before_application
+            == 0
+        ),
         details=(
-            f"{sale_before_application} sales "
-            f"occur before their application"
+            f"{sale_before_application} "
+            "sales occur before "
+            "their applications"
         ),
     )
 
-    # ================================================================
-    # 10. DEALER AND COUNTRY CONSISTENCY
-    # ================================================================
+    # =================================================================
+    # 10. DEALER / COUNTRY CONSISTENCY
+    # =================================================================
 
     dealer_country_lookup = (
         dealers
-        .set_index("dealer_id")[
+        .set_index(
+            "dealer_id"
+        )[
             "country"
         ]
     )
 
-    for name, dataframe in [
+    for (
+        name,
+        dataframe,
+    ) in [
         ("leads", leads),
-        ("applications", applications),
+        (
+            "applications",
+            applications,
+        ),
         ("sales", sales),
     ]:
 
         expected_country = (
-            dataframe["dealer_id"]
-            .map(dealer_country_lookup)
+            dataframe[
+                "dealer_id"
+            ]
+            .map(
+                dealer_country_lookup
+            )
         )
 
         mismatch_count = int(
             (
-                dataframe["country"]
+                dataframe[
+                    "country"
+                ]
                 != expected_country
             ).sum()
         )
 
         add_check(
             checks=checks,
-            name=f"{name}_dealer_country_consistency",
-            passed=mismatch_count == 0,
+            name=(
+                f"{name}_dealer_"
+                "country_consistency"
+            ),
+            passed=(
+                mismatch_count
+                == 0
+            ),
             details=(
-                f"{mismatch_count} {name} rows have "
-                f"a country inconsistent with the dealer"
+                f"{mismatch_count} "
+                f"{name} rows have "
+                "a country inconsistent "
+                "with their dealer"
             ),
         )
 
-    # ================================================================
-    # 11. APPLICATION MUST MATCH ITS ORIGINAL LEAD
-    # ================================================================
+    # =================================================================
+    # 11. APPLICATION MUST MATCH ORIGINAL LEAD
+    # =================================================================
 
     lead_dealer_lookup = (
         leads
-        .set_index("lead_id")[
+        .set_index(
+            "lead_id"
+        )[
             "dealer_id"
         ]
     )
 
     expected_application_dealer = (
-        applications["lead_id"]
-        .map(lead_dealer_lookup)
+        applications[
+            "lead_id"
+        ]
+        .map(
+            lead_dealer_lookup
+        )
     )
 
     application_dealer_mismatch = int(
         (
-            applications["dealer_id"]
+            applications[
+                "dealer_id"
+            ]
             != expected_application_dealer
         ).sum()
     )
 
     add_check(
         checks=checks,
-        name="application_lead_dealer_consistency",
-        passed=application_dealer_mismatch == 0,
+        name=(
+            "application_lead_"
+            "dealer_consistency"
+        ),
+        passed=(
+            application_dealer_mismatch
+            == 0
+        ),
         details=(
-            f"{application_dealer_mismatch} applications "
-            f"are assigned to a different dealer than "
-            f"their originating lead"
+            f"{application_dealer_mismatch} "
+            "applications use a dealer "
+            "different from their "
+            "originating lead"
         ),
     )
 
-    # ================================================================
-    # 12. SALES MUST MATCH THEIR APPLICATION AND LEAD
-    # ================================================================
+    # =================================================================
+    # 12. SALE MUST MATCH APPLICATION
+    # =================================================================
 
-    app_lead_lookup = (
+    application_lead_lookup = (
         applications
-        .set_index("application_id")[
+        .set_index(
+            "application_id"
+        )[
             "lead_id"
         ]
     )
 
-    app_dealer_lookup = (
+    application_dealer_lookup = (
         applications
-        .set_index("application_id")[
+        .set_index(
+            "application_id"
+        )[
             "dealer_id"
         ]
     )
 
     expected_sale_lead = (
-        sales["application_id"]
-        .map(app_lead_lookup)
+        sales[
+            "application_id"
+        ]
+        .map(
+            application_lead_lookup
+        )
     )
 
     expected_sale_dealer = (
-        sales["application_id"]
-        .map(app_dealer_lookup)
+        sales[
+            "application_id"
+        ]
+        .map(
+            application_dealer_lookup
+        )
     )
 
     sale_lead_mismatch = int(
         (
-            sales["lead_id"]
+            sales[
+                "lead_id"
+            ]
             != expected_sale_lead
         ).sum()
     )
 
     sale_dealer_mismatch = int(
         (
-            sales["dealer_id"]
+            sales[
+                "dealer_id"
+            ]
             != expected_sale_dealer
         ).sum()
     )
 
     add_check(
         checks=checks,
-        name="sale_application_lead_consistency",
-        passed=sale_lead_mismatch == 0,
+        name=(
+            "sale_application_"
+            "lead_consistency"
+        ),
+        passed=(
+            sale_lead_mismatch
+            == 0
+        ),
         details=(
-            f"{sale_lead_mismatch} sales contain "
-            f"an incorrect lead_id"
+            f"{sale_lead_mismatch} "
+            "sales contain an "
+            "incorrect lead_id"
         ),
     )
 
     add_check(
         checks=checks,
-        name="sale_application_dealer_consistency",
-        passed=sale_dealer_mismatch == 0,
+        name=(
+            "sale_application_"
+            "dealer_consistency"
+        ),
+        passed=(
+            sale_dealer_mismatch
+            == 0
+        ),
         details=(
-            f"{sale_dealer_mismatch} sales contain "
-            f"an incorrect dealer_id"
+            f"{sale_dealer_mismatch} "
+            "sales contain an "
+            "incorrect dealer_id"
         ),
     )
 
-    # ================================================================
-    # 13. FUNNEL COUNT LOGIC
-    # ================================================================
+    # =================================================================
+    # 13. GLOBAL FUNNEL LOGIC
+    # =================================================================
 
     number_of_leads = len(
         leads
@@ -859,7 +1198,9 @@ def validate_dataset(
 
     number_of_approved = int(
         (
-            applications["status"]
+            applications[
+                "status"
+            ]
             == "approved"
         ).sum()
     )
@@ -880,20 +1221,26 @@ def validate_dataset(
         name="global_funnel_counts",
         passed=funnel_valid,
         details=(
-            f"Leads={number_of_leads:,}, "
-            f"Applications={number_of_applications:,}, "
-            f"Approved={number_of_approved:,}, "
-            f"Sales={number_of_sales:,}"
+            f"Leads="
+            f"{number_of_leads:,}, "
+            f"Applications="
+            f"{number_of_applications:,}, "
+            f"Approved="
+            f"{number_of_approved:,}, "
+            f"Sales="
+            f"{number_of_sales:,}"
         ),
     )
 
-    # ================================================================
+    # =================================================================
     # 14. SALE AMOUNT VALIDITY
-    # ================================================================
+    # =================================================================
 
     invalid_sale_amounts = int(
         (
-            sales["sale_amount_usd"]
+            sales[
+                "sale_amount_usd"
+            ]
             <= 0
         ).sum()
     )
@@ -901,23 +1248,31 @@ def validate_dataset(
     add_check(
         checks=checks,
         name="positive_sale_amounts",
-        passed=invalid_sale_amounts == 0,
+        passed=(
+            invalid_sale_amounts
+            == 0
+        ),
         details=(
-            f"{invalid_sale_amounts} sales "
-            f"have non-positive amounts"
+            f"{invalid_sale_amounts} "
+            "sales contain "
+            "non-positive amounts"
         ),
     )
 
-    # ================================================================
+    # =================================================================
     # 15. HIDDEN DEALER TRUTH COVERAGE
-    # ================================================================
+    # =================================================================
 
     visible_dealer_ids = set(
-        dealers["dealer_id"]
+        dealers[
+            "dealer_id"
+        ]
     )
 
     truth_dealer_ids = set(
-        dealer_truth["dealer_id"]
+        dealer_truth[
+            "dealer_id"
+        ]
     )
 
     missing_truth = (
@@ -931,23 +1286,35 @@ def validate_dataset(
     )
 
     truth_matches = (
-        len(missing_truth) == 0
-        and len(extra_truth) == 0
+        len(
+            missing_truth
+        )
+        == 0
+        and
+        len(
+            extra_truth
+        )
+        == 0
     )
 
     add_check(
         checks=checks,
-        name="dealer_truth_matches_dealers",
+        name=(
+            "dealer_truth_"
+            "matches_dealers"
+        ),
         passed=truth_matches,
         details=(
-            f"Missing truth records={len(missing_truth)}, "
-            f"extra truth records={len(extra_truth)}"
+            "Missing truth records="
+            f"{len(missing_truth)}, "
+            "extra truth records="
+            f"{len(extra_truth)}"
         ),
     )
 
-    # ================================================================
-    # 16. HIDDEN PROBABILITY PARAMETER VALIDITY
-    # ================================================================
+    # =================================================================
+    # 16. HIDDEN PROBABILITY VALIDITY
+    # =================================================================
 
     probability_columns = [
         "application_rate",
@@ -957,43 +1324,128 @@ def validate_dataset(
 
     invalid_probability_count = 0
 
-    for column in probability_columns:
+    for column in (
+        probability_columns
+    ):
 
         invalid_probability_count += int(
             (
-                (dealer_truth[column] < 0)
-                | (dealer_truth[column] > 1)
+                (
+                    dealer_truth[
+                        column
+                    ]
+                    < 0
+                )
+                |
+                (
+                    dealer_truth[
+                        column
+                    ]
+                    > 1
+                )
             ).sum()
         )
 
     add_check(
         checks=checks,
-        name="hidden_probabilities_valid",
-        passed=invalid_probability_count == 0,
+        name=(
+            "hidden_probabilities_"
+            "valid"
+        ),
+        passed=(
+            invalid_probability_count
+            == 0
+        ),
         details=(
-            f"{invalid_probability_count} hidden "
-            f"probability values fall outside [0, 1]"
+            f"{invalid_probability_count} "
+            "hidden probabilities "
+            "fall outside [0, 1]"
+        ),
+    )
+
+    # =================================================================
+    # 17. HIDDEN POSITIVE PARAMETERS
+    # =================================================================
+
+    invalid_base_leads = int(
+        (
+            dealer_truth[
+                "base_monthly_leads"
+            ]
+            <= 0
+        ).sum()
+    )
+
+    add_check(
+        checks=checks,
+        name=(
+            "positive_hidden_"
+            "base_monthly_leads"
+        ),
+        passed=(
+            invalid_base_leads
+            == 0
+        ),
+        details=(
+            f"{invalid_base_leads} "
+            "dealers have non-positive "
+            "base monthly lead demand"
+        ),
+    )
+
+    invalid_average_sale_values = int(
+        (
+            dealer_truth[
+                "average_sale_value"
+            ]
+            <= 0
+        ).sum()
+    )
+
+    add_check(
+        checks=checks,
+        name=(
+            "positive_hidden_"
+            "average_sale_value"
+        ),
+        passed=(
+            invalid_average_sale_values
+            == 0
+        ),
+        details=(
+            f"{invalid_average_sale_values} "
+            "dealers have non-positive "
+            "hidden average sale values"
         ),
     )
 
     return checks
 
 
-# ---------------------------------------------------------------------
+# =====================================================================
 # REPORTING
-# ---------------------------------------------------------------------
+# =====================================================================
 
 
 def print_validation_report(
     checks: list[ValidationCheck],
 ) -> None:
     """
-    Print validation results in a readable terminal format.
+    Print validation results to the terminal.
     """
 
-    print("\n" + "=" * 70)
-    print("DATASET VALIDATION REPORT")
-    print("=" * 70)
+    print(
+        "\n"
+        + "=" * 70
+    )
+
+    print(
+        "DATASET VALIDATION REPORT"
+    )
+
+    print(
+        "=" * 70
+    )
 
     passed_count = 0
 
@@ -1009,37 +1461,53 @@ def print_validation_report(
             passed_count += 1
 
         print(
-            f"[{status}] {check.name}"
+            f"[{status}] "
+            f"{check.name}"
         )
 
         print(
-            f"       {check.details}"
+            f"       "
+            f"{check.details}"
         )
 
-    total_checks = len(checks)
+    total_checks = len(
+        checks
+    )
 
     failed_count = (
         total_checks
         - passed_count
     )
 
-    print("\n" + "-" * 70)
-
     print(
-        f"Passed: {passed_count}/{total_checks}"
+        "\n"
+        + "-" * 70
     )
 
     print(
-        f"Failed: {failed_count}/{total_checks}"
+        f"Passed: "
+        f"{passed_count}/"
+        f"{total_checks}"
     )
 
-    print("-" * 70)
+    print(
+        f"Failed: "
+        f"{failed_count}/"
+        f"{total_checks}"
+    )
+
+    print(
+        "-" * 70
+    )
 
     if failed_count == 0:
+
         print(
             "STRUCTURAL VALIDATION PASSED."
         )
+
     else:
+
         print(
             "STRUCTURAL VALIDATION FAILED."
         )
@@ -1052,7 +1520,9 @@ def save_validation_report(
     """
     Save validation results as JSON.
 
-    This creates an auditable record of dataset validation.
+    Keeping the validation report gives us an auditable record showing
+    that the dataset passed structural checks at a specific development
+    stage.
     """
 
     output_path.parent.mkdir(
@@ -1061,19 +1531,26 @@ def save_validation_report(
     )
 
     report = {
-        "total_checks": len(checks),
-        "passed_checks": sum(
-            check.passed
-            for check in checks
-        ),
-        "failed_checks": sum(
-            not check.passed
-            for check in checks
-        ),
-        "checks": [
-            asdict(check)
-            for check in checks
-        ],
+        "total_checks":
+            len(checks),
+
+        "passed_checks":
+            sum(
+                check.passed
+                for check in checks
+            ),
+
+        "failed_checks":
+            sum(
+                not check.passed
+                for check in checks
+            ),
+
+        "checks":
+            [
+                asdict(check)
+                for check in checks
+            ],
     }
 
     with output_path.open(
@@ -1092,10 +1569,8 @@ def assert_validation_passed(
     checks: list[ValidationCheck],
 ) -> None:
     """
-    Raise an exception if any validation rule fails.
-
-    This prevents later parts of the research pipeline from accidentally
-    continuing with structurally invalid data.
+    Prevent the research pipeline from continuing when structural
+    validation has failed.
     """
 
     failed_checks = [
@@ -1113,5 +1588,6 @@ def assert_validation_passed(
 
         raise ValueError(
             "Dataset validation failed. "
-            f"Failed checks: {failed_names}"
+            f"Failed checks: "
+            f"{failed_names}"
         )
