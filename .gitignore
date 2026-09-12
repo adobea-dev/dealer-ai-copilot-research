@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Virtual environment
+dealerai-env/
+# Virtual environments
+.venv/
+venv/
+env/
+
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated research data
+data/generated/*
+!data/generated/.gitkeep
+
+data/research_truth/*
+!data/research_truth/.gitkeep
+
+# Reports generated during analysis
+data/reports/*
+!data/reports/.gitkeep
+
+# Experiment outputs
+experiments/
+results/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
