@@ -1,0 +1,19 @@
+{
+    "generator_version": "2.0.0",
+    "random_seed": 42,
+    "start_date": "2024-01-01",
+    "end_date": "2025-12-31",
+    "countries": [
+        "GH",
+        "NG",
+        "KE",
+        "UG"
+    ],
+    "dealer_count": 125,
+    "lead_count": 85584,
+    "application_count": 25857,
+    "approved_application_count": 17457,
+    "rejected_application_count": 8400,
+    "sale_count": 10133,
+    "note": "This dataset is synthetic. Country-level demand multipliers and behavioural relationships are simulation parameters and are not empirical claims about real automotive markets."
+}
