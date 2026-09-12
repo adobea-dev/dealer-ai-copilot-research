@@ -1,0 +1,396 @@
+{
+  "C1_DEV_01": {
+    "expected_columns": [
+      "dealer_count"
+    ],
+    "sql": "SELECT COUNT(*) AS dealer_count FROM dealers WHERE country = 'GH';"
+  },
+  "C1_DEV_02": {
+    "expected_columns": [
+      "lead_count"
+    ],
+    "sql": "SELECT COUNT(*) AS lead_count FROM leads WHERE country = 'NG' AND lead_date >= DATE '2024-01-01' AND lead_date < DATE '2025-01-01';"
+  },
+  "C1_TEST_01": {
+    "expected_columns": [
+      "sales_count"
+    ],
+    "sql": "SELECT COUNT(*) AS sales_count FROM sales WHERE country = 'KE' AND sale_date >= DATE '2025-01-01' AND sale_date < DATE '2026-01-01';"
+  },
+  "C1_TEST_02": {
+    "expected_columns": [
+      "approved_application_count"
+    ],
+    "sql": "SELECT COUNT(*) AS approved_application_count FROM applications WHERE country = 'UG' AND status = 'approved' AND application_date >= DATE '2024-01-01' AND application_date < DATE '2025-01-01';"
+  },
+  "C1_TEST_03": {
+    "expected_columns": [
+      "revenue_usd"
+    ],
+    "sql": "SELECT ROUND(COALESCE(SUM(sale_amount_usd), 0), 2) AS revenue_usd FROM sales WHERE country = 'GH' AND sale_date >= DATE '2025-01-01' AND sale_date < DATE '2026-01-01';"
+  },
+  "C1_TEST_04": {
+    "expected_columns": [
+      "lead_count"
+    ],
+    "sql": "SELECT COUNT(*) AS lead_count FROM leads WHERE country = 'NG' AND lead_source = 'referral' AND lead_date >= DATE '2025-01-01' AND lead_date < DATE '2026-01-01';"
+  },
+  "C1_TEST_05": {
+    "expected_columns": [
+      "application_count"
+    ],
+    "sql": "SELECT COUNT(*) AS application_count FROM applications WHERE country = 'KE' AND application_channel = 'bank_partner' AND application_date >= DATE '2024-01-01' AND application_date < DATE '2025-01-01';"
+  },
+  "C1_TEST_06": {
+    "expected_columns": [
+      "sales_count"
+    ],
+    "sql": "SELECT COUNT(*) AS sales_count FROM sales WHERE country = 'UG' AND financing_bank = 'Bank_C' AND sale_date >= DATE '2025-01-01' AND sale_date < DATE '2026-01-01';"
+  },
+  "C2_DEV_01": {
+    "expected_columns": [
+      "approved_application_count"
+    ],
+    "sql": "SELECT COUNT(*) AS approved_application_count FROM applications WHERE country = 'GH' AND status = 'approved' AND application_channel = 'online' AND application_date >= DATE '2025-01-01' AND application_date < DATE '2025-04-01';"
+  },
+  "C2_DEV_02": {
+    "expected_columns": [
+      "revenue_usd"
+    ],
+    "sql": "SELECT ROUND(COALESCE(SUM(sale_amount_usd), 0), 2) AS revenue_usd FROM sales WHERE country = 'NG' AND financing_bank = 'Bank_A' AND sale_date >= DATE '2024-07-01' AND sale_date < DATE '2025-01-01';"
+  },
+  "C2_TEST_01": {
+    "expected_columns": [
+      "rejected_application_count"
+    ],
+    "sql": "SELECT COUNT(*) AS rejected_application_count FROM applications WHERE country = 'KE' AND status = 'rejected' AND application_channel = 'bank_partner' AND application_date >= DATE '2025-04-01' AND application_date < DATE '2025-07-01';"
+  },
+  "C2_TEST_02": {
+    "expected_columns": [
+      "lead_count"
+    ],
+    "sql": "SELECT COUNT(*) AS lead_count FROM leads WHERE country = 'UG' AND lead_source = 'social' AND lead_date >= DATE '2024-10-01' AND lead_date < DATE '2025-01-01';"
+  },
+  "C2_TEST_03": {
+    "expected_columns": [
+      "approved_application_count"
+    ],
+    "sql": "SELECT COUNT(*) AS approved_application_count FROM applications WHERE country = 'NG' AND status = 'approved' AND application_channel = 'dealer_branch' AND application_date >= DATE '2025-07-01' AND application_date < DATE '2025-10-01';"
+  },
+  "C2_TEST_04": {
+    "expected_columns": [
+      "sales_count"
+    ],
+    "sql": "SELECT COUNT(*) AS sales_count FROM sales WHERE country = 'GH' AND financing_bank = 'Bank_D' AND sale_date >= DATE '2024-01-01' AND sale_date < DATE '2024-04-01';"
+  },
+  "C2_TEST_05": {
+    "expected_columns": [
+      "lead_count"
+    ],
+    "sql": "SELECT COUNT(*) AS lead_count FROM leads WHERE country = 'KE' AND lead_source = 'marketplace' AND lead_date >= DATE '2025-01-01' AND lead_date < DATE '2025-07-01';"
+  },
+  "C2_TEST_06": {
+    "expected_columns": [
+      "revenue_usd"
+    ],
+    "sql": "SELECT ROUND(COALESCE(SUM(sale_amount_usd), 0), 2) AS revenue_usd FROM sales WHERE country = 'UG' AND financing_bank = 'Bank_B' AND sale_date >= DATE '2025-10-01' AND sale_date < DATE '2026-01-01';"
+  },
+  "C3_DEV_01": {
+    "expected_columns": [
+      "dealer_name",
+      "application_count"
+    ],
+    "sql": "SELECT d.dealer_name, COUNT(a.application_id) AS application_count FROM dealers d JOIN applications a ON a.dealer_id = d.dealer_id WHERE d.country = 'GH' AND a.application_date >= DATE '2025-01-01' AND a.application_date < DATE '2026-01-01' GROUP BY d.dealer_id, d.dealer_name ORDER BY application_count DESC, d.dealer_name ASC LIMIT 5;"
+  },
+  "C3_DEV_02": {
+    "expected_columns": [
+      "dealer_name",
+      "lead_count"
+    ],
+    "sql": "SELECT d.dealer_name, COUNT(l.lead_id) AS lead_count FROM dealers d LEFT JOIN leads l ON l.dealer_id = d.dealer_id AND l.lead_date >= DATE '2024-01-01' AND l.lead_date < DATE '2025-01-01' WHERE d.country = 'KE' GROUP BY d.dealer_id, d.dealer_name ORDER BY lead_count ASC, d.dealer_name ASC LIMIT 5;"
+  },
+  "C3_TEST_01": {
+    "expected_columns": [
+      "dealer_name",
+      "sales_count",
+      "revenue_usd"
+    ],
+    "sql": "SELECT d.dealer_name, COUNT(s.sale_id) AS sales_count, ROUND(SUM(s.sale_amount_usd), 2) AS revenue_usd FROM dealers d JOIN sales s ON s.dealer_id = d.dealer_id WHERE d.country = 'NG' AND s.sale_date >= DATE '2024-01-01' AND s.sale_date < DATE '2025-01-01' GROUP BY d.dealer_id, d.dealer_name ORDER BY revenue_usd DESC, d.dealer_name ASC LIMIT 3;"
+  },
+  "C3_TEST_02": {
+    "expected_columns": [
+      "dealer_name",
+      "sales_count"
+    ],
+    "sql": "SELECT d.dealer_name, COUNT(s.sale_id) AS sales_count FROM dealers d JOIN sales s ON s.dealer_id = d.dealer_id WHERE d.country = 'UG' AND s.sale_date >= DATE '2025-01-01' AND s.sale_date < DATE '2026-01-01' GROUP BY d.dealer_id, d.dealer_name ORDER BY sales_count DESC, d.dealer_name ASC LIMIT 5;"
+  },
+  "C3_TEST_03": {
+    "expected_columns": [
+      "country",
+      "lead_count"
+    ],
+    "sql": "SELECT country, COUNT(*) AS lead_count FROM leads WHERE lead_date >= DATE '2025-01-01' AND lead_date < DATE '2026-01-01' GROUP BY country ORDER BY lead_count DESC, country ASC;"
+  },
+  "C3_TEST_04": {
+    "expected_columns": [
+      "dealer_name",
+      "referral_lead_count"
+    ],
+    "sql": "SELECT d.dealer_name, COUNT(l.lead_id) AS referral_lead_count FROM dealers d LEFT JOIN leads l ON l.dealer_id = d.dealer_id AND l.lead_source = 'referral' AND l.lead_date >= DATE '2024-01-01' AND l.lead_date < DATE '2025-01-01' WHERE d.country = 'KE' GROUP BY d.dealer_id, d.dealer_name ORDER BY referral_lead_count DESC, d.dealer_name ASC LIMIT 5;"
+  },
+  "C3_TEST_05": {
+    "expected_columns": [
+      "dealer_name",
+      "sales_count"
+    ],
+    "sql": "SELECT d.dealer_name, COUNT(s.sale_id) AS sales_count FROM dealers d LEFT JOIN sales s ON s.dealer_id = d.dealer_id AND s.sale_date >= DATE '2025-01-01' AND s.sale_date < DATE '2026-01-01' WHERE d.country = 'NG' GROUP BY d.dealer_id, d.dealer_name ORDER BY sales_count ASC, d.dealer_name ASC LIMIT 5;"
+  },
+  "C3_TEST_06": {
+    "expected_columns": [
+      "financing_bank",
+      "sales_count",
+      "revenue_usd"
+    ],
+    "sql": "SELECT financing_bank, COUNT(*) AS sales_count, ROUND(SUM(sale_amount_usd), 2) AS revenue_usd FROM sales WHERE sale_date >= DATE '2025-01-01' AND sale_date < DATE '2026-01-01' GROUP BY financing_bank ORDER BY revenue_usd DESC, financing_bank ASC;"
+  },
+  "C4_DEV_01": {
+    "expected_columns": [
+      "lead_count",
+      "application_count",
+      "conversion_pct"
+    ],
+    "sql": "WITH cohort AS (SELECT lead_id FROM leads WHERE country = 'GH' AND lead_date >= DATE '2025-01-01' AND lead_date < DATE '2026-01-01') SELECT COUNT(*) AS lead_count, COUNT(a.application_id) AS application_count, ROUND(100.0 * COUNT(a.application_id)::numeric / NULLIF(COUNT(*), 0), 2) AS conversion_pct FROM cohort c LEFT JOIN applications a ON a.lead_id = c.lead_id;"
+  },
+  "C4_DEV_02": {
+    "expected_columns": [
+      "application_count",
+      "approved_application_count",
+      "approval_pct"
+    ],
+    "sql": "SELECT COUNT(*) AS application_count, COUNT(*) FILTER (WHERE status = 'approved') AS approved_application_count, ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'approved')::numeric / NULLIF(COUNT(*), 0), 2) AS approval_pct FROM applications WHERE country = 'UG' AND application_date >= DATE '2024-01-01' AND application_date < DATE '2025-01-01';"
+  },
+  "C4_TEST_01": {
+    "expected_columns": [
+      "approved_application_count",
+      "sales_count",
+      "conversion_pct"
+    ],
+    "sql": "WITH cohort AS (SELECT application_id FROM applications WHERE country = 'NG' AND status = 'approved' AND application_date >= DATE '2025-01-01' AND application_date < DATE '2026-01-01') SELECT COUNT(*) AS approved_application_count, COUNT(s.sale_id) AS sales_count, ROUND(100.0 * COUNT(s.sale_id)::numeric / NULLIF(COUNT(*), 0), 2) AS conversion_pct FROM cohort c LEFT JOIN sales s ON s.application_id = c.application_id;"
+  },
+  "C4_TEST_02": {
+    "expected_columns": [
+      "sales_count",
+      "average_sale_value_usd"
+    ],
+    "sql": "SELECT COUNT(*) AS sales_count, ROUND(AVG(sale_amount_usd), 2) AS average_sale_value_usd FROM sales WHERE country = 'KE' AND sale_date >= DATE '2025-01-01' AND sale_date < DATE '2026-01-01';"
+  },
+  "C4_TEST_03": {
+    "expected_columns": [
+      "lead_count",
+      "sales_count",
+      "conversion_pct"
+    ],
+    "sql": "WITH cohort AS (SELECT lead_id FROM leads WHERE country = 'GH' AND lead_date >= DATE '2024-01-01' AND lead_date < DATE '2025-01-01') SELECT COUNT(*) AS lead_count, COUNT(s.sale_id) AS sales_count, ROUND(100.0 * COUNT(s.sale_id)::numeric / NULLIF(COUNT(*), 0), 2) AS conversion_pct FROM cohort c LEFT JOIN sales s ON s.lead_id = c.lead_id;"
+  },
+  "C4_TEST_04": {
+    "expected_columns": [
+      "application_count",
+      "rejected_application_count",
+      "rejection_pct"
+    ],
+    "sql": "SELECT COUNT(*) AS application_count, COUNT(*) FILTER (WHERE status = 'rejected') AS rejected_application_count, ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'rejected')::numeric / NULLIF(COUNT(*), 0), 2) AS rejection_pct FROM applications WHERE country = 'NG' AND application_date >= DATE '2025-01-01' AND application_date < DATE '2026-01-01';"
+  },
+  "C4_TEST_05": {
+    "expected_columns": [
+      "sales_count",
+      "revenue_usd",
+      "revenue_per_sale_usd"
+    ],
+    "sql": "SELECT COUNT(*) AS sales_count, ROUND(SUM(sale_amount_usd), 2) AS revenue_usd, ROUND(SUM(sale_amount_usd) / NULLIF(COUNT(*), 0), 2) AS revenue_per_sale_usd FROM sales WHERE country = 'UG' AND sale_date >= DATE '2025-01-01' AND sale_date < DATE '2026-01-01';"
+  },
+  "C4_TEST_06": {
+    "expected_columns": [
+      "sales_2024",
+      "sales_2025",
+      "growth_pct"
+    ],
+    "sql": "WITH yearly AS (SELECT COUNT(*) FILTER (WHERE sale_date >= DATE '2024-01-01' AND sale_date < DATE '2025-01-01') AS sales_2024, COUNT(*) FILTER (WHERE sale_date >= DATE '2025-01-01' AND sale_date < DATE '2026-01-01') AS sales_2025 FROM sales WHERE country = 'KE') SELECT sales_2024, sales_2025, ROUND(100.0 * (sales_2025 - sales_2024)::numeric / NULLIF(sales_2024, 0), 2) AS growth_pct FROM yearly;"
+  },
+  "C5_DEV_01": {
+    "expected_columns": [
+      "month",
+      "lead_count",
+      "sales_count"
+    ],
+    "sql": "WITH months AS (SELECT generate_series(DATE '2025-01-01', DATE '2025-12-01', INTERVAL '1 month')::date AS month), l AS (SELECT DATE_TRUNC('month', lead_date)::date AS month, COUNT(*) AS lead_count FROM leads WHERE country = 'KE' AND lead_date >= DATE '2025-01-01' AND lead_date < DATE '2026-01-01' GROUP BY 1), s AS (SELECT DATE_TRUNC('month', sale_date)::date AS month, COUNT(*) AS sales_count FROM sales WHERE country = 'KE' AND sale_date >= DATE '2025-01-01' AND sale_date < DATE '2026-01-01' GROUP BY 1) SELECT m.month, COALESCE(l.lead_count, 0) AS lead_count, COALESCE(s.sales_count, 0) AS sales_count FROM months m LEFT JOIN l USING (month) LEFT JOIN s USING (month) ORDER BY m.month;"
+  },
+  "C5_DEV_02": {
+    "expected_columns": [
+      "quarter",
+      "application_count",
+      "approved_application_count",
+      "approval_pct"
+    ],
+    "sql": "WITH quarters AS (SELECT generate_series(1, 4) AS quarter), a AS (SELECT EXTRACT(QUARTER FROM application_date)::int AS quarter, COUNT(*) AS application_count, COUNT(*) FILTER (WHERE status = 'approved') AS approved_application_count FROM applications WHERE country = 'UG' AND application_date >= DATE '2024-01-01' AND application_date < DATE '2025-01-01' GROUP BY 1) SELECT q.quarter, COALESCE(a.application_count, 0) AS application_count, COALESCE(a.approved_application_count, 0) AS approved_application_count, ROUND(100.0 * COALESCE(a.approved_application_count, 0)::numeric / NULLIF(COALESCE(a.application_count, 0), 0), 2) AS approval_pct FROM quarters q LEFT JOIN a USING (quarter) ORDER BY q.quarter;"
+  },
+  "C5_TEST_01": {
+    "expected_columns": [
+      "month",
+      "application_count",
+      "sales_count",
+      "sales_rank"
+    ],
+    "sql": "WITH months AS (SELECT generate_series(DATE '2025-01-01', DATE '2025-12-01', INTERVAL '1 month')::date AS month), a AS (SELECT DATE_TRUNC('month', application_date)::date AS month, COUNT(*) AS application_count FROM applications WHERE country = 'NG' AND application_date >= DATE '2025-01-01' AND application_date < DATE '2026-01-01' GROUP BY 1), s AS (SELECT DATE_TRUNC('month', sale_date)::date AS month, COUNT(*) AS sales_count FROM sales WHERE country = 'NG' AND sale_date >= DATE '2025-01-01' AND sale_date < DATE '2026-01-01' GROUP BY 1), combined AS (SELECT m.month, COALESCE(a.application_count, 0) AS application_count, COALESCE(s.sales_count, 0) AS sales_count FROM months m LEFT JOIN a USING (month) LEFT JOIN s USING (month)) SELECT month, application_count, sales_count, DENSE_RANK() OVER (ORDER BY sales_count DESC) AS sales_rank FROM combined ORDER BY month;"
+  },
+  "C5_TEST_02": {
+    "expected_columns": [
+      "quarter",
+      "sales_count",
+      "revenue_usd",
+      "revenue_rank"
+    ],
+    "sql": "WITH quarters AS (SELECT generate_series(1, 4) AS quarter), s AS (SELECT EXTRACT(QUARTER FROM sale_date)::int AS quarter, COUNT(*) AS sales_count, ROUND(SUM(sale_amount_usd), 2) AS revenue_usd FROM sales WHERE country = 'GH' AND sale_date >= DATE '2025-01-01' AND sale_date < DATE '2026-01-01' GROUP BY 1), combined AS (SELECT q.quarter, COALESCE(s.sales_count, 0) AS sales_count, COALESCE(s.revenue_usd, 0) AS revenue_usd FROM quarters q LEFT JOIN s USING (quarter)) SELECT quarter, sales_count, revenue_usd, DENSE_RANK() OVER (ORDER BY revenue_usd DESC) AS revenue_rank FROM combined ORDER BY quarter;"
+  },
+  "C5_TEST_03": {
+    "expected_columns": [
+      "month",
+      "lead_count",
+      "application_count",
+      "applications_per_lead_pct",
+      "percentage_rank"
+    ],
+    "sql": "WITH months AS (SELECT generate_series(DATE '2024-01-01', DATE '2024-12-01', INTERVAL '1 month')::date AS month), l AS (SELECT DATE_TRUNC('month', lead_date)::date AS month, COUNT(*) AS lead_count FROM leads WHERE country = 'KE' AND lead_date >= DATE '2024-01-01' AND lead_date < DATE '2025-01-01' GROUP BY 1), a AS (SELECT DATE_TRUNC('month', application_date)::date AS month, COUNT(*) AS application_count FROM applications WHERE country = 'KE' AND application_date >= DATE '2024-01-01' AND application_date < DATE '2025-01-01' GROUP BY 1), combined AS (SELECT m.month, COALESCE(l.lead_count, 0) AS lead_count, COALESCE(a.application_count, 0) AS application_count, ROUND(100.0 * COALESCE(a.application_count, 0)::numeric / NULLIF(COALESCE(l.lead_count, 0), 0), 2) AS applications_per_lead_pct FROM months m LEFT JOIN l USING (month) LEFT JOIN a USING (month)) SELECT month, lead_count, application_count, applications_per_lead_pct, DENSE_RANK() OVER (ORDER BY applications_per_lead_pct DESC NULLS LAST) AS percentage_rank FROM combined ORDER BY month;"
+  },
+  "C5_TEST_04": {
+    "expected_columns": [
+      "month",
+      "application_count",
+      "approved_application_count",
+      "sales_count"
+    ],
+    "sql": "WITH months AS (SELECT generate_series(DATE '2025-01-01', DATE '2025-12-01', INTERVAL '1 month')::date AS month), a AS (SELECT DATE_TRUNC('month', application_date)::date AS month, COUNT(*) AS application_count, COUNT(*) FILTER (WHERE status = 'approved') AS approved_application_count FROM applications WHERE country = 'UG' AND application_date >= DATE '2025-01-01' AND application_date < DATE '2026-01-01' GROUP BY 1), s AS (SELECT DATE_TRUNC('month', sale_date)::date AS month, COUNT(*) AS sales_count FROM sales WHERE country = 'UG' AND sale_date >= DATE '2025-01-01' AND sale_date < DATE '2026-01-01' GROUP BY 1) SELECT m.month, COALESCE(a.application_count, 0) AS application_count, COALESCE(a.approved_application_count, 0) AS approved_application_count, COALESCE(s.sales_count, 0) AS sales_count FROM months m LEFT JOIN a USING (month) LEFT JOIN s USING (month) ORDER BY m.month;"
+  },
+  "C5_TEST_05": {
+    "expected_columns": [
+      "country",
+      "quarter",
+      "sales_count",
+      "revenue_usd"
+    ],
+    "sql": "WITH countries AS (SELECT DISTINCT country FROM dealers), quarters AS (SELECT generate_series(1, 4) AS quarter), grid AS (SELECT c.country, q.quarter FROM countries c CROSS JOIN quarters q), s AS (SELECT country, EXTRACT(QUARTER FROM sale_date)::int AS quarter, COUNT(*) AS sales_count, ROUND(SUM(sale_amount_usd), 2) AS revenue_usd FROM sales WHERE sale_date >= DATE '2025-01-01' AND sale_date < DATE '2026-01-01' GROUP BY 1,2) SELECT g.country, g.quarter, COALESCE(s.sales_count, 0) AS sales_count, COALESCE(s.revenue_usd, 0) AS revenue_usd FROM grid g LEFT JOIN s ON s.country = g.country AND s.quarter = g.quarter ORDER BY g.country, g.quarter;"
+  },
+  "C5_TEST_06": {
+    "expected_columns": [
+      "month",
+      "sales_2024",
+      "sales_2025",
+      "difference"
+    ],
+    "sql": "WITH months AS (SELECT generate_series(1, 12) AS month_number), y2024 AS (SELECT EXTRACT(MONTH FROM sale_date)::int AS month_number, COUNT(*) AS sales_2024 FROM sales WHERE country = 'NG' AND sale_date >= DATE '2024-01-01' AND sale_date < DATE '2025-01-01' GROUP BY 1), y2025 AS (SELECT EXTRACT(MONTH FROM sale_date)::int AS month_number, COUNT(*) AS sales_2025 FROM sales WHERE country = 'NG' AND sale_date >= DATE '2025-01-01' AND sale_date < DATE '2026-01-01' GROUP BY 1) SELECT TO_CHAR(TO_DATE(m.month_number::text, 'MM'), 'Mon') AS month, COALESCE(y2024.sales_2024, 0) AS sales_2024, COALESCE(y2025.sales_2025, 0) AS sales_2025, COALESCE(y2025.sales_2025, 0) - COALESCE(y2024.sales_2024, 0) AS difference FROM months m LEFT JOIN y2024 USING (month_number) LEFT JOIN y2025 USING (month_number) ORDER BY m.month_number;"
+  },
+  "C6_DEV_01": {
+    "expected_columns": [
+      "dealer_name",
+      "country",
+      "leads",
+      "applications",
+      "approved_applications",
+      "sales",
+      "lead_to_sale_pct",
+      "median_lead_to_sale_pct"
+    ],
+    "sql": "WITH cohort AS (\n    SELECT\n        lead_id,\n        dealer_id\n    FROM leads\n    WHERE lead_date >= DATE '2025-01-01'\n      AND lead_date < DATE '2026-01-01'\n),\nmetrics AS (\n    SELECT\n        d.dealer_id,\n        d.dealer_name,\n        d.country,\n        COUNT(c.lead_id) AS leads,\n        COUNT(a.application_id) AS applications,\n        COUNT(a.application_id) FILTER (\n            WHERE a.status = 'approved'\n        ) AS approved_applications,\n        COUNT(s.sale_id) AS sales,\n        ROUND(\n            100.0 * COUNT(s.sale_id)::numeric\n            / NULLIF(COUNT(c.lead_id), 0),\n            2\n        ) AS lead_to_sale_pct\n    FROM dealers d\n    LEFT JOIN cohort c\n        ON c.dealer_id = d.dealer_id\n    LEFT JOIN applications a\n        ON a.lead_id = c.lead_id\n    LEFT JOIN sales s\n        ON s.lead_id = c.lead_id\n    GROUP BY\n        d.dealer_id,\n        d.dealer_name,\n        d.country\n),\nmedian_value AS (\n    SELECT\n        PERCENTILE_CONT(0.5)\n        WITHIN GROUP (\n            ORDER BY lead_to_sale_pct\n        ) AS median_lead_to_sale_pct\n    FROM metrics\n    WHERE leads > 0\n)\nSELECT\n    m.dealer_name,\n    m.country,\n    m.leads,\n    m.applications,\n    m.approved_applications,\n    m.sales,\n    m.lead_to_sale_pct,\n    ROUND(\n        v.median_lead_to_sale_pct::numeric,\n        2\n    ) AS median_lead_to_sale_pct\nFROM metrics m\nCROSS JOIN median_value v\nWHERE m.leads >= 200\n  AND m.lead_to_sale_pct < v.median_lead_to_sale_pct\nORDER BY\n    m.leads DESC,\n    m.dealer_name ASC\nLIMIT 5;"
+  },
+  "C6_DEV_02": {
+    "expected_columns": [
+      "month",
+      "application_count",
+      "sales_count",
+      "gap",
+      "gap_rank"
+    ],
+    "sql": "WITH months AS (SELECT generate_series(DATE '2025-01-01', DATE '2025-12-01', INTERVAL '1 month')::date AS month), a AS (SELECT DATE_TRUNC('month', application_date)::date AS month, COUNT(*) AS application_count FROM applications WHERE country = 'KE' AND application_date >= DATE '2025-01-01' AND application_date < DATE '2026-01-01' GROUP BY 1), s AS (SELECT DATE_TRUNC('month', sale_date)::date AS month, COUNT(*) AS sales_count FROM sales WHERE country = 'KE' AND sale_date >= DATE '2025-01-01' AND sale_date < DATE '2026-01-01' GROUP BY 1), combined AS (SELECT m.month, COALESCE(a.application_count, 0) AS application_count, COALESCE(s.sales_count, 0) AS sales_count, COALESCE(a.application_count, 0) - COALESCE(s.sales_count, 0) AS gap FROM months m LEFT JOIN a USING (month) LEFT JOIN s USING (month)) SELECT month, application_count, sales_count, gap, DENSE_RANK() OVER (ORDER BY gap DESC) AS gap_rank FROM combined ORDER BY month;"
+  },
+  "C6_TEST_01": {
+    "expected_columns": [
+      "dealer_name",
+      "leads",
+      "applications",
+      "approved_applications",
+      "sales",
+      "lead_to_application_pct",
+      "application_approval_pct",
+      "approved_to_sale_pct",
+      "weakest_stage"
+    ],
+    "sql": "WITH cohort AS (\n    SELECT\n        l.lead_id,\n        l.dealer_id\n    FROM leads l\n    JOIN dealers d\n        ON d.dealer_id = l.dealer_id\n    WHERE d.country = 'GH'\n      AND l.lead_date >= DATE '2025-01-01'\n      AND l.lead_date < DATE '2026-01-01'\n),\nmetrics AS (\n    SELECT\n        d.dealer_id,\n        d.dealer_name,\n        COUNT(c.lead_id) AS leads,\n        COUNT(a.application_id) AS applications,\n        COUNT(a.application_id) FILTER (\n            WHERE a.status = 'approved'\n        ) AS approved_applications,\n        COUNT(s.sale_id) AS sales,\n        ROUND(\n            100.0 * COUNT(a.application_id)::numeric\n            / NULLIF(COUNT(c.lead_id), 0),\n            2\n        ) AS lead_to_application_pct,\n        ROUND(\n            100.0 * COUNT(a.application_id) FILTER (\n                WHERE a.status = 'approved'\n            )::numeric\n            / NULLIF(COUNT(a.application_id), 0),\n            2\n        ) AS application_approval_pct,\n        ROUND(\n            100.0 * COUNT(s.sale_id)::numeric\n            / NULLIF(\n                COUNT(a.application_id) FILTER (\n                    WHERE a.status = 'approved'\n                ),\n                0\n            ),\n            2\n        ) AS approved_to_sale_pct,\n        ROUND(\n            100.0 * COUNT(s.sale_id)::numeric\n            / NULLIF(COUNT(c.lead_id), 0),\n            2\n        ) AS lead_to_sale_pct\n    FROM dealers d\n    LEFT JOIN cohort c\n        ON c.dealer_id = d.dealer_id\n    LEFT JOIN applications a\n        ON a.lead_id = c.lead_id\n    LEFT JOIN sales s\n        ON s.lead_id = c.lead_id\n    WHERE d.country = 'GH'\n    GROUP BY\n        d.dealer_id,\n        d.dealer_name\n)\nSELECT\n    dealer_name,\n    leads,\n    applications,\n    approved_applications,\n    sales,\n    lead_to_application_pct,\n    application_approval_pct,\n    approved_to_sale_pct,\n    CASE\n        WHEN lead_to_application_pct <= application_approval_pct\n         AND lead_to_application_pct <= approved_to_sale_pct\n            THEN 'lead_to_application'\n        WHEN application_approval_pct <= approved_to_sale_pct\n            THEN 'application_to_approval'\n        ELSE 'approval_to_sale'\n    END AS weakest_stage\nFROM metrics\nWHERE leads >= 150\nORDER BY\n    lead_to_sale_pct DESC,\n    dealer_name ASC\nLIMIT 5;"
+  },
+  "C6_TEST_02": {
+    "expected_columns": [
+      "country",
+      "leads",
+      "applications",
+      "approved_applications",
+      "sales",
+      "revenue_usd",
+      "lead_to_sale_pct",
+      "conversion_rank",
+      "revenue_rank"
+    ],
+    "sql": "WITH cohort AS (\n    SELECT\n        lead_id,\n        dealer_id,\n        country\n    FROM leads\n    WHERE lead_date >= DATE '2025-01-01'\n      AND lead_date < DATE '2026-01-01'\n),\nmetrics AS (\n    SELECT\n        c.country,\n        COUNT(c.lead_id) AS leads,\n        COUNT(a.application_id) AS applications,\n        COUNT(a.application_id) FILTER (\n            WHERE a.status = 'approved'\n        ) AS approved_applications,\n        COUNT(s.sale_id) AS sales,\n        ROUND(\n            COALESCE(SUM(s.sale_amount_usd), 0),\n            2\n        ) AS revenue_usd,\n        ROUND(\n            100.0 * COUNT(s.sale_id)::numeric\n            / NULLIF(COUNT(c.lead_id), 0),\n            2\n        ) AS lead_to_sale_pct\n    FROM cohort c\n    LEFT JOIN applications a\n        ON a.lead_id = c.lead_id\n    LEFT JOIN sales s\n        ON s.lead_id = c.lead_id\n    GROUP BY c.country\n)\nSELECT\n    country,\n    leads,\n    applications,\n    approved_applications,\n    sales,\n    revenue_usd,\n    lead_to_sale_pct,\n    DENSE_RANK() OVER (\n        ORDER BY lead_to_sale_pct DESC\n    ) AS conversion_rank,\n    DENSE_RANK() OVER (\n        ORDER BY revenue_usd DESC\n    ) AS revenue_rank\nFROM metrics\nORDER BY country;"
+  },
+  "C6_TEST_03": {
+    "expected_columns": [
+      "quarter",
+      "leads",
+      "applications",
+      "approved_applications",
+      "sales",
+      "lead_to_application_pct",
+      "application_approval_pct",
+      "approved_to_sale_pct",
+      "lead_to_sale_pct",
+      "weakest_stage",
+      "lead_to_sale_rank"
+    ],
+    "sql": "WITH quarters AS (\n    SELECT generate_series(1, 4) AS quarter\n),\ncohort AS (\n    SELECT\n        lead_id,\n        EXTRACT(\n            QUARTER FROM lead_date\n        )::integer AS quarter\n    FROM leads\n    WHERE country = 'NG'\n      AND lead_date >= DATE '2025-01-01'\n      AND lead_date < DATE '2026-01-01'\n),\nmetrics AS (\n    SELECT\n        q.quarter,\n        COUNT(c.lead_id) AS leads,\n        COUNT(a.application_id) AS applications,\n        COUNT(a.application_id) FILTER (\n            WHERE a.status = 'approved'\n        ) AS approved_applications,\n        COUNT(s.sale_id) AS sales,\n        ROUND(\n            100.0 * COUNT(a.application_id)::numeric\n            / NULLIF(COUNT(c.lead_id), 0),\n            2\n        ) AS lead_to_application_pct,\n        ROUND(\n            100.0 * COUNT(a.application_id) FILTER (\n                WHERE a.status = 'approved'\n            )::numeric\n            / NULLIF(COUNT(a.application_id), 0),\n            2\n        ) AS application_approval_pct,\n        ROUND(\n            100.0 * COUNT(s.sale_id)::numeric\n            / NULLIF(\n                COUNT(a.application_id) FILTER (\n                    WHERE a.status = 'approved'\n                ),\n                0\n            ),\n            2\n        ) AS approved_to_sale_pct,\n        ROUND(\n            100.0 * COUNT(s.sale_id)::numeric\n            / NULLIF(COUNT(c.lead_id), 0),\n            2\n        ) AS lead_to_sale_pct\n    FROM quarters q\n    LEFT JOIN cohort c\n        ON c.quarter = q.quarter\n    LEFT JOIN applications a\n        ON a.lead_id = c.lead_id\n    LEFT JOIN sales s\n        ON s.lead_id = c.lead_id\n    GROUP BY q.quarter\n),\ndiagnosed AS (\n    SELECT\n        quarter,\n        leads,\n        applications,\n        approved_applications,\n        sales,\n        lead_to_application_pct,\n        application_approval_pct,\n        approved_to_sale_pct,\n        lead_to_sale_pct,\n        CASE\n            WHEN lead_to_application_pct <= application_approval_pct\n             AND lead_to_application_pct <= approved_to_sale_pct\n                THEN 'lead_to_application'\n            WHEN application_approval_pct <= approved_to_sale_pct\n                THEN 'application_to_approval'\n            ELSE 'approval_to_sale'\n        END AS weakest_stage\n    FROM metrics\n)\nSELECT\n    quarter,\n    leads,\n    applications,\n    approved_applications,\n    sales,\n    lead_to_application_pct,\n    application_approval_pct,\n    approved_to_sale_pct,\n    lead_to_sale_pct,\n    weakest_stage,\n    DENSE_RANK() OVER (\n        ORDER BY lead_to_sale_pct DESC\n    ) AS lead_to_sale_rank\nFROM diagnosed\nORDER BY quarter;"
+  },
+  "C6_TEST_04": {
+    "expected_columns": [
+      "country",
+      "lead_count",
+      "application_count",
+      "sales_count",
+      "lead_to_application_pct",
+      "lead_to_sale_pct",
+      "lead_to_sale_rank"
+    ],
+    "sql": "WITH cohort AS (SELECT lead_id, country FROM leads WHERE lead_date >= DATE '2025-12-01' AND lead_date < DATE '2026-01-01'), metrics AS (SELECT c.country, COUNT(*) AS lead_count, COUNT(a.application_id) AS application_count, COUNT(s.sale_id) AS sales_count, ROUND(100.0 * COUNT(a.application_id)::numeric / NULLIF(COUNT(*),0), 2) AS lead_to_application_pct, ROUND(100.0 * COUNT(s.sale_id)::numeric / NULLIF(COUNT(*),0), 2) AS lead_to_sale_pct FROM cohort c LEFT JOIN applications a ON a.lead_id = c.lead_id LEFT JOIN sales s ON s.lead_id = c.lead_id GROUP BY c.country) SELECT country, lead_count, application_count, sales_count, lead_to_application_pct, lead_to_sale_pct, DENSE_RANK() OVER (ORDER BY lead_to_sale_pct DESC) AS lead_to_sale_rank FROM metrics ORDER BY country;"
+  },
+  "C6_TEST_05": {
+    "expected_columns": [
+      "dealer_name",
+      "country",
+      "leads_2024",
+      "sales_2024",
+      "lead_to_sale_pct_2024",
+      "leads_2025",
+      "sales_2025",
+      "lead_to_sale_pct_2025",
+      "improvement_percentage_points"
+    ],
+    "sql": "WITH yearly AS (\n    SELECT\n        d.dealer_id,\n        d.dealer_name,\n        d.country,\n        EXTRACT(\n            YEAR FROM l.lead_date\n        )::integer AS cohort_year,\n        COUNT(l.lead_id) AS leads,\n        COUNT(s.sale_id) AS sales,\n        ROUND(\n            100.0 * COUNT(s.sale_id)::numeric\n            / NULLIF(COUNT(l.lead_id), 0),\n            2\n        ) AS lead_to_sale_pct\n    FROM dealers d\n    JOIN leads l\n        ON l.dealer_id = d.dealer_id\n    LEFT JOIN sales s\n        ON s.lead_id = l.lead_id\n    WHERE l.lead_date >= DATE '2024-01-01'\n      AND l.lead_date < DATE '2026-01-01'\n    GROUP BY\n        d.dealer_id,\n        d.dealer_name,\n        d.country,\n        EXTRACT(YEAR FROM l.lead_date)\n),\ny2024 AS (\n    SELECT *\n    FROM yearly\n    WHERE cohort_year = 2024\n),\ny2025 AS (\n    SELECT *\n    FROM yearly\n    WHERE cohort_year = 2025\n)\nSELECT\n    y2025.dealer_name,\n    y2025.country,\n    y2024.leads AS leads_2024,\n    y2024.sales AS sales_2024,\n    y2024.lead_to_sale_pct AS lead_to_sale_pct_2024,\n    y2025.leads AS leads_2025,\n    y2025.sales AS sales_2025,\n    y2025.lead_to_sale_pct AS lead_to_sale_pct_2025,\n    ROUND(\n        y2025.lead_to_sale_pct\n        - y2024.lead_to_sale_pct,\n        2\n    ) AS improvement_percentage_points\nFROM y2024\nJOIN y2025\n    ON y2025.dealer_id = y2024.dealer_id\nWHERE y2024.leads >= 150\n  AND y2025.leads >= 150\nORDER BY\n    improvement_percentage_points DESC,\n    y2025.dealer_name ASC\nLIMIT 5;"
+  },
+  "C6_TEST_06": {
+    "expected_columns": [
+      "month",
+      "application_count",
+      "sales_count",
+      "revenue_usd",
+      "gap",
+      "revenue_rank",
+      "gap_rank"
+    ],
+    "sql": "WITH months AS (SELECT generate_series(DATE '2025-01-01', DATE '2025-12-01', INTERVAL '1 month')::date AS month), a AS (SELECT DATE_TRUNC('month', application_date)::date AS month, COUNT(*) AS application_count FROM applications WHERE country = 'UG' AND application_date >= DATE '2025-01-01' AND application_date < DATE '2026-01-01' GROUP BY 1), s AS (SELECT DATE_TRUNC('month', sale_date)::date AS month, COUNT(*) AS sales_count, ROUND(SUM(sale_amount_usd),2) AS revenue_usd FROM sales WHERE country = 'UG' AND sale_date >= DATE '2025-01-01' AND sale_date < DATE '2026-01-01' GROUP BY 1), combined AS (SELECT m.month, COALESCE(a.application_count,0) AS application_count, COALESCE(s.sales_count,0) AS sales_count, COALESCE(s.revenue_usd,0) AS revenue_usd, COALESCE(a.application_count,0) - COALESCE(s.sales_count,0) AS gap FROM months m LEFT JOIN a USING (month) LEFT JOIN s USING (month)) SELECT month, application_count, sales_count, revenue_usd, gap, DENSE_RANK() OVER (ORDER BY revenue_usd DESC) AS revenue_rank, DENSE_RANK() OVER (ORDER BY gap DESC) AS gap_rank FROM combined ORDER BY month;"
+  }
+}

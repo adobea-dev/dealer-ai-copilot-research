@@ -1,0 +1,1670 @@
+{
+  "C1_DEV_01": {
+    "columns": [
+      "dealer_count"
+    ],
+    "rows": [
+      {
+        "dealer_count": 30
+      }
+    ]
+  },
+  "C1_DEV_02": {
+    "columns": [
+      "lead_count"
+    ],
+    "rows": [
+      {
+        "lead_count": 17209
+      }
+    ]
+  },
+  "C1_TEST_01": {
+    "columns": [
+      "sales_count"
+    ],
+    "rows": [
+      {
+        "sales_count": 947
+      }
+    ]
+  },
+  "C1_TEST_02": {
+    "columns": [
+      "approved_application_count"
+    ],
+    "rows": [
+      {
+        "approved_application_count": 1379
+      }
+    ]
+  },
+  "C1_TEST_03": {
+    "columns": [
+      "revenue_usd"
+    ],
+    "rows": [
+      {
+        "revenue_usd": 12540129.12
+      }
+    ]
+  },
+  "C1_TEST_04": {
+    "columns": [
+      "lead_count"
+    ],
+    "rows": [
+      {
+        "lead_count": 3507
+      }
+    ]
+  },
+  "C1_TEST_05": {
+    "columns": [
+      "application_count"
+    ],
+    "rows": [
+      {
+        "application_count": 957
+      }
+    ]
+  },
+  "C1_TEST_06": {
+    "columns": [
+      "sales_count"
+    ],
+    "rows": [
+      {
+        "sales_count": 226
+      }
+    ]
+  },
+  "C2_DEV_01": {
+    "columns": [
+      "approved_application_count"
+    ],
+    "rows": [
+      {
+        "approved_application_count": 132
+      }
+    ]
+  },
+  "C2_DEV_02": {
+    "columns": [
+      "revenue_usd"
+    ],
+    "rows": [
+      {
+        "revenue_usd": 3325348.52
+      }
+    ]
+  },
+  "C2_TEST_01": {
+    "columns": [
+      "rejected_application_count"
+    ],
+    "rows": [
+      {
+        "rejected_application_count": 96
+      }
+    ]
+  },
+  "C2_TEST_02": {
+    "columns": [
+      "lead_count"
+    ],
+    "rows": [
+      {
+        "lead_count": 273
+      }
+    ]
+  },
+  "C2_TEST_03": {
+    "columns": [
+      "approved_application_count"
+    ],
+    "rows": [
+      {
+        "approved_application_count": 292
+      }
+    ]
+  },
+  "C2_TEST_04": {
+    "columns": [
+      "sales_count"
+    ],
+    "rows": [
+      {
+        "sales_count": 37
+      }
+    ]
+  },
+  "C2_TEST_05": {
+    "columns": [
+      "lead_count"
+    ],
+    "rows": [
+      {
+        "lead_count": 1062
+      }
+    ]
+  },
+  "C2_TEST_06": {
+    "columns": [
+      "revenue_usd"
+    ],
+    "rows": [
+      {
+        "revenue_usd": 573592.2
+      }
+    ]
+  },
+  "C3_DEV_01": {
+    "columns": [
+      "dealer_name",
+      "application_count"
+    ],
+    "rows": [
+      {
+        "dealer_name": "GH-Dealer-019",
+        "application_count": 183
+      },
+      {
+        "dealer_name": "GH-Dealer-007",
+        "application_count": 132
+      },
+      {
+        "dealer_name": "GH-Dealer-023",
+        "application_count": 131
+      },
+      {
+        "dealer_name": "GH-Dealer-017",
+        "application_count": 108
+      },
+      {
+        "dealer_name": "GH-Dealer-026",
+        "application_count": 106
+      }
+    ]
+  },
+  "C3_DEV_02": {
+    "columns": [
+      "dealer_name",
+      "lead_count"
+    ],
+    "rows": [
+      {
+        "dealer_name": "KE-Dealer-003",
+        "lead_count": 103
+      },
+      {
+        "dealer_name": "KE-Dealer-015",
+        "lead_count": 109
+      },
+      {
+        "dealer_name": "KE-Dealer-020",
+        "lead_count": 110
+      },
+      {
+        "dealer_name": "KE-Dealer-024",
+        "lead_count": 118
+      },
+      {
+        "dealer_name": "KE-Dealer-002",
+        "lead_count": 202
+      }
+    ]
+  },
+  "C3_TEST_01": {
+    "columns": [
+      "dealer_name",
+      "sales_count",
+      "revenue_usd"
+    ],
+    "rows": [
+      {
+        "dealer_name": "NG-Dealer-004",
+        "sales_count": 166,
+        "revenue_usd": 3900650.1
+      },
+      {
+        "dealer_name": "NG-Dealer-012",
+        "sales_count": 137,
+        "revenue_usd": 3267082.07
+      },
+      {
+        "dealer_name": "NG-Dealer-031",
+        "sales_count": 89,
+        "revenue_usd": 2148040.42
+      }
+    ]
+  },
+  "C3_TEST_02": {
+    "columns": [
+      "dealer_name",
+      "sales_count"
+    ],
+    "rows": [
+      {
+        "dealer_name": "UG-Dealer-004",
+        "sales_count": 125
+      },
+      {
+        "dealer_name": "UG-Dealer-013",
+        "sales_count": 120
+      },
+      {
+        "dealer_name": "UG-Dealer-002",
+        "sales_count": 68
+      },
+      {
+        "dealer_name": "UG-Dealer-022",
+        "sales_count": 65
+      },
+      {
+        "dealer_name": "UG-Dealer-014",
+        "sales_count": 48
+      }
+    ]
+  },
+  "C3_TEST_03": {
+    "columns": [
+      "country",
+      "lead_count"
+    ],
+    "rows": [
+      {
+        "country": "NG",
+        "lead_count": 16998
+      },
+      {
+        "country": "KE",
+        "lead_count": 9827
+      },
+      {
+        "country": "GH",
+        "lead_count": 7465
+      },
+      {
+        "country": "UG",
+        "lead_count": 6948
+      }
+    ]
+  },
+  "C3_TEST_04": {
+    "columns": [
+      "dealer_name",
+      "referral_lead_count"
+    ],
+    "rows": [
+      {
+        "dealer_name": "KE-Dealer-030",
+        "referral_lead_count": 130
+      },
+      {
+        "dealer_name": "KE-Dealer-005",
+        "referral_lead_count": 124
+      },
+      {
+        "dealer_name": "KE-Dealer-028",
+        "referral_lead_count": 110
+      },
+      {
+        "dealer_name": "KE-Dealer-018",
+        "referral_lead_count": 105
+      },
+      {
+        "dealer_name": "KE-Dealer-025",
+        "referral_lead_count": 103
+      }
+    ]
+  },
+  "C3_TEST_05": {
+    "columns": [
+      "dealer_name",
+      "sales_count"
+    ],
+    "rows": [
+      {
+        "dealer_name": "NG-Dealer-022",
+        "sales_count": 2
+      },
+      {
+        "dealer_name": "NG-Dealer-029",
+        "sales_count": 4
+      },
+      {
+        "dealer_name": "NG-Dealer-013",
+        "sales_count": 8
+      },
+      {
+        "dealer_name": "NG-Dealer-017",
+        "sales_count": 9
+      },
+      {
+        "dealer_name": "NG-Dealer-033",
+        "sales_count": 10
+      }
+    ]
+  },
+  "C3_TEST_06": {
+    "columns": [
+      "financing_bank",
+      "sales_count",
+      "revenue_usd"
+    ],
+    "rows": [
+      {
+        "financing_bank": "Bank_C",
+        "sales_count": 1139,
+        "revenue_usd": 17906243.26
+      },
+      {
+        "financing_bank": "Bank_A",
+        "sales_count": 1114,
+        "revenue_usd": 17281941.69
+      },
+      {
+        "financing_bank": "Bank_B",
+        "sales_count": 1076,
+        "revenue_usd": 16810190.99
+      },
+      {
+        "financing_bank": "Bank_D",
+        "sales_count": 1067,
+        "revenue_usd": 16800646.14
+      }
+    ]
+  },
+  "C4_DEV_01": {
+    "columns": [
+      "lead_count",
+      "application_count",
+      "conversion_pct"
+    ],
+    "rows": [
+      {
+        "lead_count": 7465,
+        "application_count": 2251,
+        "conversion_pct": 30.15
+      }
+    ]
+  },
+  "C4_DEV_02": {
+    "columns": [
+      "application_count",
+      "approved_application_count",
+      "approval_pct"
+    ],
+    "rows": [
+      {
+        "application_count": 2030,
+        "approved_application_count": 1379,
+        "approval_pct": 67.93
+      }
+    ]
+  },
+  "C4_TEST_01": {
+    "columns": [
+      "approved_application_count",
+      "sales_count",
+      "conversion_pct"
+    ],
+    "rows": [
+      {
+        "approved_application_count": 3232,
+        "sales_count": 1787,
+        "conversion_pct": 55.29
+      }
+    ]
+  },
+  "C4_TEST_02": {
+    "columns": [
+      "sales_count",
+      "average_sale_value_usd"
+    ],
+    "rows": [
+      {
+        "sales_count": 947,
+        "average_sale_value_usd": 14194.18
+      }
+    ]
+  },
+  "C4_TEST_03": {
+    "columns": [
+      "lead_count",
+      "sales_count",
+      "conversion_pct"
+    ],
+    "rows": [
+      {
+        "lead_count": 7658,
+        "sales_count": 861,
+        "conversion_pct": 11.24
+      }
+    ]
+  },
+  "C4_TEST_04": {
+    "columns": [
+      "application_count",
+      "rejected_application_count",
+      "rejection_pct"
+    ],
+    "rows": [
+      {
+        "application_count": 4997,
+        "rejected_application_count": 1765,
+        "rejection_pct": 35.32
+      }
+    ]
+  },
+  "C4_TEST_05": {
+    "columns": [
+      "sales_count",
+      "revenue_usd",
+      "revenue_per_sale_usd"
+    ],
+    "rows": [
+      {
+        "sales_count": 824,
+        "revenue_usd": 13236229.02,
+        "revenue_per_sale_usd": 16063.38
+      }
+    ]
+  },
+  "C4_TEST_06": {
+    "columns": [
+      "sales_2024",
+      "sales_2025",
+      "growth_pct"
+    ],
+    "rows": [
+      {
+        "sales_2024": 919,
+        "sales_2025": 947,
+        "growth_pct": 3.05
+      }
+    ]
+  },
+  "C5_DEV_01": {
+    "columns": [
+      "month",
+      "lead_count",
+      "sales_count"
+    ],
+    "rows": [
+      {
+        "month": "2025-01-01",
+        "lead_count": 736,
+        "sales_count": 75
+      },
+      {
+        "month": "2025-02-01",
+        "lead_count": 817,
+        "sales_count": 72
+      },
+      {
+        "month": "2025-03-01",
+        "lead_count": 923,
+        "sales_count": 97
+      },
+      {
+        "month": "2025-04-01",
+        "lead_count": 891,
+        "sales_count": 92
+      },
+      {
+        "month": "2025-05-01",
+        "lead_count": 894,
+        "sales_count": 66
+      },
+      {
+        "month": "2025-06-01",
+        "lead_count": 848,
+        "sales_count": 91
+      },
+      {
+        "month": "2025-07-01",
+        "lead_count": 874,
+        "sales_count": 81
+      },
+      {
+        "month": "2025-08-01",
+        "lead_count": 851,
+        "sales_count": 92
+      },
+      {
+        "month": "2025-09-01",
+        "lead_count": 772,
+        "sales_count": 64
+      },
+      {
+        "month": "2025-10-01",
+        "lead_count": 779,
+        "sales_count": 66
+      },
+      {
+        "month": "2025-11-01",
+        "lead_count": 712,
+        "sales_count": 78
+      },
+      {
+        "month": "2025-12-01",
+        "lead_count": 730,
+        "sales_count": 73
+      }
+    ]
+  },
+  "C5_DEV_02": {
+    "columns": [
+      "quarter",
+      "application_count",
+      "approved_application_count",
+      "approval_pct"
+    ],
+    "rows": [
+      {
+        "quarter": 1,
+        "application_count": 484,
+        "approved_application_count": 348,
+        "approval_pct": 71.9
+      },
+      {
+        "quarter": 2,
+        "application_count": 602,
+        "approved_application_count": 408,
+        "approval_pct": 67.77
+      },
+      {
+        "quarter": 3,
+        "application_count": 520,
+        "approved_application_count": 328,
+        "approval_pct": 63.08
+      },
+      {
+        "quarter": 4,
+        "application_count": 424,
+        "approved_application_count": 295,
+        "approval_pct": 69.58
+      }
+    ]
+  },
+  "C5_TEST_01": {
+    "columns": [
+      "month",
+      "application_count",
+      "sales_count",
+      "sales_rank"
+    ],
+    "rows": [
+      {
+        "month": "2025-01-01",
+        "application_count": 394,
+        "sales_count": 133,
+        "sales_rank": 8
+      },
+      {
+        "month": "2025-02-01",
+        "application_count": 381,
+        "sales_count": 116,
+        "sales_rank": 11
+      },
+      {
+        "month": "2025-03-01",
+        "application_count": 478,
+        "sales_count": 165,
+        "sales_rank": 4
+      },
+      {
+        "month": "2025-04-01",
+        "application_count": 462,
+        "sales_count": 169,
+        "sales_rank": 3
+      },
+      {
+        "month": "2025-05-01",
+        "application_count": 477,
+        "sales_count": 174,
+        "sales_rank": 2
+      },
+      {
+        "month": "2025-06-01",
+        "application_count": 469,
+        "sales_count": 157,
+        "sales_rank": 6
+      },
+      {
+        "month": "2025-07-01",
+        "application_count": 463,
+        "sales_count": 185,
+        "sales_rank": 1
+      },
+      {
+        "month": "2025-08-01",
+        "application_count": 393,
+        "sales_count": 139,
+        "sales_rank": 7
+      },
+      {
+        "month": "2025-09-01",
+        "application_count": 417,
+        "sales_count": 131,
+        "sales_rank": 10
+      },
+      {
+        "month": "2025-10-01",
+        "application_count": 370,
+        "sales_count": 162,
+        "sales_rank": 5
+      },
+      {
+        "month": "2025-11-01",
+        "application_count": 350,
+        "sales_count": 133,
+        "sales_rank": 8
+      },
+      {
+        "month": "2025-12-01",
+        "application_count": 343,
+        "sales_count": 132,
+        "sales_rank": 9
+      }
+    ]
+  },
+  "C5_TEST_02": {
+    "columns": [
+      "quarter",
+      "sales_count",
+      "revenue_usd",
+      "revenue_rank"
+    ],
+    "rows": [
+      {
+        "quarter": 1,
+        "sales_count": 205,
+        "revenue_usd": 3164427.51,
+        "revenue_rank": 3
+      },
+      {
+        "quarter": 2,
+        "sales_count": 222,
+        "revenue_usd": 3219143.23,
+        "revenue_rank": 2
+      },
+      {
+        "quarter": 3,
+        "sales_count": 215,
+        "revenue_usd": 3311767.59,
+        "revenue_rank": 1
+      },
+      {
+        "quarter": 4,
+        "sales_count": 187,
+        "revenue_usd": 2844790.79,
+        "revenue_rank": 4
+      }
+    ]
+  },
+  "C5_TEST_03": {
+    "columns": [
+      "month",
+      "lead_count",
+      "application_count",
+      "applications_per_lead_pct",
+      "percentage_rank"
+    ],
+    "rows": [
+      {
+        "month": "2024-01-01",
+        "lead_count": 752,
+        "application_count": 193,
+        "applications_per_lead_pct": 25.66,
+        "percentage_rank": 12
+      },
+      {
+        "month": "2024-02-01",
+        "lead_count": 827,
+        "application_count": 230,
+        "applications_per_lead_pct": 27.81,
+        "percentage_rank": 10
+      },
+      {
+        "month": "2024-03-01",
+        "lead_count": 822,
+        "application_count": 266,
+        "applications_per_lead_pct": 32.36,
+        "percentage_rank": 2
+      },
+      {
+        "month": "2024-04-01",
+        "lead_count": 855,
+        "application_count": 250,
+        "applications_per_lead_pct": 29.24,
+        "percentage_rank": 7
+      },
+      {
+        "month": "2024-05-01",
+        "lead_count": 903,
+        "application_count": 258,
+        "applications_per_lead_pct": 28.57,
+        "percentage_rank": 8
+      },
+      {
+        "month": "2024-06-01",
+        "lead_count": 882,
+        "application_count": 249,
+        "applications_per_lead_pct": 28.23,
+        "percentage_rank": 9
+      },
+      {
+        "month": "2024-07-01",
+        "lead_count": 862,
+        "application_count": 266,
+        "applications_per_lead_pct": 30.86,
+        "percentage_rank": 4
+      },
+      {
+        "month": "2024-08-01",
+        "lead_count": 786,
+        "application_count": 218,
+        "applications_per_lead_pct": 27.74,
+        "percentage_rank": 11
+      },
+      {
+        "month": "2024-09-01",
+        "lead_count": 754,
+        "application_count": 253,
+        "applications_per_lead_pct": 33.55,
+        "percentage_rank": 1
+      },
+      {
+        "month": "2024-10-01",
+        "lead_count": 726,
+        "application_count": 229,
+        "applications_per_lead_pct": 31.54,
+        "percentage_rank": 3
+      },
+      {
+        "month": "2024-11-01",
+        "lead_count": 746,
+        "application_count": 230,
+        "applications_per_lead_pct": 30.83,
+        "percentage_rank": 5
+      },
+      {
+        "month": "2024-12-01",
+        "lead_count": 735,
+        "application_count": 225,
+        "applications_per_lead_pct": 30.61,
+        "percentage_rank": 6
+      }
+    ]
+  },
+  "C5_TEST_04": {
+    "columns": [
+      "month",
+      "application_count",
+      "approved_application_count",
+      "sales_count"
+    ],
+    "rows": [
+      {
+        "month": "2025-01-01",
+        "application_count": 171,
+        "approved_application_count": 107,
+        "sales_count": 67
+      },
+      {
+        "month": "2025-02-01",
+        "application_count": 173,
+        "approved_application_count": 120,
+        "sales_count": 65
+      },
+      {
+        "month": "2025-03-01",
+        "application_count": 199,
+        "approved_application_count": 126,
+        "sales_count": 78
+      },
+      {
+        "month": "2025-04-01",
+        "application_count": 219,
+        "approved_application_count": 157,
+        "sales_count": 84
+      },
+      {
+        "month": "2025-05-01",
+        "application_count": 191,
+        "approved_application_count": 129,
+        "sales_count": 92
+      },
+      {
+        "month": "2025-06-01",
+        "application_count": 189,
+        "approved_application_count": 131,
+        "sales_count": 83
+      },
+      {
+        "month": "2025-07-01",
+        "application_count": 178,
+        "approved_application_count": 118,
+        "sales_count": 74
+      },
+      {
+        "month": "2025-08-01",
+        "application_count": 159,
+        "approved_application_count": 103,
+        "sales_count": 56
+      },
+      {
+        "month": "2025-09-01",
+        "application_count": 178,
+        "approved_application_count": 117,
+        "sales_count": 65
+      },
+      {
+        "month": "2025-10-01",
+        "application_count": 142,
+        "approved_application_count": 101,
+        "sales_count": 73
+      },
+      {
+        "month": "2025-11-01",
+        "application_count": 128,
+        "approved_application_count": 87,
+        "sales_count": 41
+      },
+      {
+        "month": "2025-12-01",
+        "application_count": 126,
+        "approved_application_count": 90,
+        "sales_count": 46
+      }
+    ]
+  },
+  "C5_TEST_05": {
+    "columns": [
+      "country",
+      "quarter",
+      "sales_count",
+      "revenue_usd"
+    ],
+    "rows": [
+      {
+        "country": "GH",
+        "quarter": 1,
+        "sales_count": 205,
+        "revenue_usd": 3164427.51
+      },
+      {
+        "country": "GH",
+        "quarter": 2,
+        "sales_count": 222,
+        "revenue_usd": 3219143.23
+      },
+      {
+        "country": "GH",
+        "quarter": 3,
+        "sales_count": 215,
+        "revenue_usd": 3311767.59
+      },
+      {
+        "country": "GH",
+        "quarter": 4,
+        "sales_count": 187,
+        "revenue_usd": 2844790.79
+      },
+      {
+        "country": "KE",
+        "quarter": 1,
+        "sales_count": 244,
+        "revenue_usd": 3359132.8
+      },
+      {
+        "country": "KE",
+        "quarter": 2,
+        "sales_count": 249,
+        "revenue_usd": 3555274.83
+      },
+      {
+        "country": "KE",
+        "quarter": 3,
+        "sales_count": 237,
+        "revenue_usd": 3440923.96
+      },
+      {
+        "country": "KE",
+        "quarter": 4,
+        "sales_count": 217,
+        "revenue_usd": 3086555.95
+      },
+      {
+        "country": "NG",
+        "quarter": 1,
+        "sales_count": 414,
+        "revenue_usd": 6846194.45
+      },
+      {
+        "country": "NG",
+        "quarter": 2,
+        "sales_count": 500,
+        "revenue_usd": 8245944.73
+      },
+      {
+        "country": "NG",
+        "quarter": 3,
+        "sales_count": 455,
+        "revenue_usd": 7548571.73
+      },
+      {
+        "country": "NG",
+        "quarter": 4,
+        "sales_count": 427,
+        "revenue_usd": 6940065.49
+      },
+      {
+        "country": "UG",
+        "quarter": 1,
+        "sales_count": 210,
+        "revenue_usd": 3343538.2
+      },
+      {
+        "country": "UG",
+        "quarter": 2,
+        "sales_count": 259,
+        "revenue_usd": 4214425.29
+      },
+      {
+        "country": "UG",
+        "quarter": 3,
+        "sales_count": 195,
+        "revenue_usd": 3119214.4
+      },
+      {
+        "country": "UG",
+        "quarter": 4,
+        "sales_count": 160,
+        "revenue_usd": 2559051.13
+      }
+    ]
+  },
+  "C5_TEST_06": {
+    "columns": [
+      "month",
+      "sales_2024",
+      "sales_2025",
+      "difference"
+    ],
+    "rows": [
+      {
+        "month": "Jan",
+        "sales_2024": 81,
+        "sales_2025": 133,
+        "difference": 52
+      },
+      {
+        "month": "Feb",
+        "sales_2024": 123,
+        "sales_2025": 116,
+        "difference": -7
+      },
+      {
+        "month": "Mar",
+        "sales_2024": 143,
+        "sales_2025": 165,
+        "difference": 22
+      },
+      {
+        "month": "Apr",
+        "sales_2024": 168,
+        "sales_2025": 169,
+        "difference": 1
+      },
+      {
+        "month": "May",
+        "sales_2024": 179,
+        "sales_2025": 174,
+        "difference": -5
+      },
+      {
+        "month": "Jun",
+        "sales_2024": 162,
+        "sales_2025": 157,
+        "difference": -5
+      },
+      {
+        "month": "Jul",
+        "sales_2024": 176,
+        "sales_2025": 185,
+        "difference": 9
+      },
+      {
+        "month": "Aug",
+        "sales_2024": 140,
+        "sales_2025": 139,
+        "difference": -1
+      },
+      {
+        "month": "Sep",
+        "sales_2024": 162,
+        "sales_2025": 131,
+        "difference": -31
+      },
+      {
+        "month": "Oct",
+        "sales_2024": 137,
+        "sales_2025": 162,
+        "difference": 25
+      },
+      {
+        "month": "Nov",
+        "sales_2024": 110,
+        "sales_2025": 133,
+        "difference": 23
+      },
+      {
+        "month": "Dec",
+        "sales_2024": 131,
+        "sales_2025": 132,
+        "difference": 1
+      }
+    ]
+  },
+  "C6_DEV_01": {
+    "columns": [
+      "dealer_name",
+      "country",
+      "leads",
+      "applications",
+      "approved_applications",
+      "sales",
+      "lead_to_sale_pct",
+      "median_lead_to_sale_pct"
+    ],
+    "rows": [
+      {
+        "dealer_name": "NG-Dealer-038",
+        "country": "NG",
+        "leads": 865,
+        "applications": 254,
+        "approved_applications": 141,
+        "sales": 32,
+        "lead_to_sale_pct": 3.7,
+        "median_lead_to_sale_pct": 9.52
+      },
+      {
+        "dealer_name": "KE-Dealer-030",
+        "country": "KE",
+        "leads": 734,
+        "applications": 181,
+        "approved_applications": 93,
+        "sales": 53,
+        "lead_to_sale_pct": 7.22,
+        "median_lead_to_sale_pct": 9.52
+      },
+      {
+        "dealer_name": "KE-Dealer-001",
+        "country": "KE",
+        "leads": 528,
+        "applications": 122,
+        "approved_applications": 89,
+        "sales": 48,
+        "lead_to_sale_pct": 9.09,
+        "median_lead_to_sale_pct": 9.52
+      },
+      {
+        "dealer_name": "UG-Dealer-003",
+        "country": "UG",
+        "leads": 477,
+        "applications": 76,
+        "approved_applications": 51,
+        "sales": 25,
+        "lead_to_sale_pct": 5.24,
+        "median_lead_to_sale_pct": 9.52
+      },
+      {
+        "dealer_name": "NG-Dealer-005",
+        "country": "NG",
+        "leads": 463,
+        "applications": 132,
+        "approved_applications": 83,
+        "sales": 38,
+        "lead_to_sale_pct": 8.21,
+        "median_lead_to_sale_pct": 9.52
+      }
+    ]
+  },
+  "C6_DEV_02": {
+    "columns": [
+      "month",
+      "application_count",
+      "sales_count",
+      "gap",
+      "gap_rank"
+    ],
+    "rows": [
+      {
+        "month": "2025-01-01",
+        "application_count": 217,
+        "sales_count": 75,
+        "gap": 142,
+        "gap_rank": 10
+      },
+      {
+        "month": "2025-02-01",
+        "application_count": 248,
+        "sales_count": 72,
+        "gap": 176,
+        "gap_rank": 4
+      },
+      {
+        "month": "2025-03-01",
+        "application_count": 253,
+        "sales_count": 97,
+        "gap": 156,
+        "gap_rank": 8
+      },
+      {
+        "month": "2025-04-01",
+        "application_count": 274,
+        "sales_count": 92,
+        "gap": 182,
+        "gap_rank": 1
+      },
+      {
+        "month": "2025-05-01",
+        "application_count": 245,
+        "sales_count": 66,
+        "gap": 179,
+        "gap_rank": 2
+      },
+      {
+        "month": "2025-06-01",
+        "application_count": 269,
+        "sales_count": 91,
+        "gap": 178,
+        "gap_rank": 3
+      },
+      {
+        "month": "2025-07-01",
+        "application_count": 249,
+        "sales_count": 81,
+        "gap": 168,
+        "gap_rank": 5
+      },
+      {
+        "month": "2025-08-01",
+        "application_count": 252,
+        "sales_count": 92,
+        "gap": 160,
+        "gap_rank": 7
+      },
+      {
+        "month": "2025-09-01",
+        "application_count": 231,
+        "sales_count": 64,
+        "gap": 167,
+        "gap_rank": 6
+      },
+      {
+        "month": "2025-10-01",
+        "application_count": 222,
+        "sales_count": 66,
+        "gap": 156,
+        "gap_rank": 8
+      },
+      {
+        "month": "2025-11-01",
+        "application_count": 212,
+        "sales_count": 78,
+        "gap": 134,
+        "gap_rank": 11
+      },
+      {
+        "month": "2025-12-01",
+        "application_count": 224,
+        "sales_count": 73,
+        "gap": 151,
+        "gap_rank": 9
+      }
+    ]
+  },
+  "C6_TEST_01": {
+    "columns": [
+      "dealer_name",
+      "leads",
+      "applications",
+      "approved_applications",
+      "sales",
+      "lead_to_application_pct",
+      "application_approval_pct",
+      "approved_to_sale_pct",
+      "weakest_stage"
+    ],
+    "rows": [
+      {
+        "dealer_name": "GH-Dealer-019",
+        "leads": 331,
+        "applications": 184,
+        "approved_applications": 155,
+        "sales": 102,
+        "lead_to_application_pct": 55.59,
+        "application_approval_pct": 84.24,
+        "approved_to_sale_pct": 65.81,
+        "weakest_stage": "lead_to_application"
+      },
+      {
+        "dealer_name": "GH-Dealer-025",
+        "leads": 242,
+        "applications": 86,
+        "approved_applications": 63,
+        "sales": 42,
+        "lead_to_application_pct": 35.54,
+        "application_approval_pct": 73.26,
+        "approved_to_sale_pct": 66.67,
+        "weakest_stage": "lead_to_application"
+      },
+      {
+        "dealer_name": "GH-Dealer-017",
+        "leads": 285,
+        "applications": 110,
+        "approved_applications": 80,
+        "sales": 49,
+        "lead_to_application_pct": 38.6,
+        "application_approval_pct": 72.73,
+        "approved_to_sale_pct": 61.25,
+        "weakest_stage": "lead_to_application"
+      },
+      {
+        "dealer_name": "GH-Dealer-007",
+        "leads": 365,
+        "applications": 133,
+        "approved_applications": 95,
+        "sales": 51,
+        "lead_to_application_pct": 36.44,
+        "application_approval_pct": 71.43,
+        "approved_to_sale_pct": 53.68,
+        "weakest_stage": "lead_to_application"
+      },
+      {
+        "dealer_name": "GH-Dealer-002",
+        "leads": 258,
+        "applications": 82,
+        "approved_applications": 64,
+        "sales": 34,
+        "lead_to_application_pct": 31.78,
+        "application_approval_pct": 78.05,
+        "approved_to_sale_pct": 53.13,
+        "weakest_stage": "lead_to_application"
+      }
+    ]
+  },
+  "C6_TEST_02": {
+    "columns": [
+      "country",
+      "leads",
+      "applications",
+      "approved_applications",
+      "sales",
+      "revenue_usd",
+      "lead_to_sale_pct",
+      "conversion_rank",
+      "revenue_rank"
+    ],
+    "rows": [
+      {
+        "country": "GH",
+        "leads": 7465,
+        "applications": 2251,
+        "approved_applications": 1500,
+        "sales": 826,
+        "revenue_usd": 12483677.07,
+        "lead_to_sale_pct": 11.06,
+        "conversion_rank": 2,
+        "revenue_rank": 4
+      },
+      {
+        "country": "KE",
+        "leads": 9827,
+        "applications": 2894,
+        "approved_applications": 1748,
+        "sales": 945,
+        "revenue_usd": 13411453.76,
+        "lead_to_sale_pct": 9.62,
+        "conversion_rank": 4,
+        "revenue_rank": 2
+      },
+      {
+        "country": "NG",
+        "leads": 16998,
+        "applications": 5006,
+        "approved_applications": 3235,
+        "sales": 1792,
+        "revenue_usd": 29433906.58,
+        "lead_to_sale_pct": 10.54,
+        "conversion_rank": 3,
+        "revenue_rank": 1
+      },
+      {
+        "country": "UG",
+        "leads": 6948,
+        "applications": 2049,
+        "approved_applications": 1383,
+        "sales": 822,
+        "revenue_usd": 13198657.01,
+        "lead_to_sale_pct": 11.83,
+        "conversion_rank": 1,
+        "revenue_rank": 3
+      }
+    ]
+  },
+  "C6_TEST_03": {
+    "columns": [
+      "quarter",
+      "leads",
+      "applications",
+      "approved_applications",
+      "sales",
+      "lead_to_application_pct",
+      "application_approval_pct",
+      "approved_to_sale_pct",
+      "lead_to_sale_pct",
+      "weakest_stage",
+      "lead_to_sale_rank"
+    ],
+    "rows": [
+      {
+        "quarter": 1,
+        "leads": 4286,
+        "applications": 1274,
+        "approved_applications": 813,
+        "sales": 442,
+        "lead_to_application_pct": 29.72,
+        "application_approval_pct": 63.81,
+        "approved_to_sale_pct": 54.37,
+        "lead_to_sale_pct": 10.31,
+        "weakest_stage": "lead_to_application",
+        "lead_to_sale_rank": 4
+      },
+      {
+        "quarter": 2,
+        "leads": 4674,
+        "applications": 1408,
+        "approved_applications": 939,
+        "sales": 507,
+        "lead_to_application_pct": 30.12,
+        "application_approval_pct": 66.69,
+        "approved_to_sale_pct": 53.99,
+        "lead_to_sale_pct": 10.85,
+        "weakest_stage": "lead_to_application",
+        "lead_to_sale_rank": 1
+      },
+      {
+        "quarter": 3,
+        "leads": 4290,
+        "applications": 1261,
+        "approved_applications": 815,
+        "sales": 456,
+        "lead_to_application_pct": 29.39,
+        "application_approval_pct": 64.63,
+        "approved_to_sale_pct": 55.95,
+        "lead_to_sale_pct": 10.63,
+        "weakest_stage": "lead_to_application",
+        "lead_to_sale_rank": 2
+      },
+      {
+        "quarter": 4,
+        "leads": 3748,
+        "applications": 1063,
+        "approved_applications": 668,
+        "sales": 387,
+        "lead_to_application_pct": 28.36,
+        "application_approval_pct": 62.84,
+        "approved_to_sale_pct": 57.93,
+        "lead_to_sale_pct": 10.33,
+        "weakest_stage": "lead_to_application",
+        "lead_to_sale_rank": 3
+      }
+    ]
+  },
+  "C6_TEST_04": {
+    "columns": [
+      "country",
+      "lead_count",
+      "application_count",
+      "sales_count",
+      "lead_to_application_pct",
+      "lead_to_sale_pct",
+      "lead_to_sale_rank"
+    ],
+    "rows": [
+      {
+        "country": "GH",
+        "lead_count": 552,
+        "application_count": 183,
+        "sales_count": 72,
+        "lead_to_application_pct": 33.15,
+        "lead_to_sale_pct": 13.04,
+        "lead_to_sale_rank": 1
+      },
+      {
+        "country": "KE",
+        "lead_count": 730,
+        "application_count": 218,
+        "sales_count": 80,
+        "lead_to_application_pct": 29.86,
+        "lead_to_sale_pct": 10.96,
+        "lead_to_sale_rank": 3
+      },
+      {
+        "country": "NG",
+        "lead_count": 1236,
+        "application_count": 361,
+        "sales_count": 121,
+        "lead_to_application_pct": 29.21,
+        "lead_to_sale_pct": 9.79,
+        "lead_to_sale_rank": 4
+      },
+      {
+        "country": "UG",
+        "lead_count": 490,
+        "application_count": 135,
+        "sales_count": 54,
+        "lead_to_application_pct": 27.55,
+        "lead_to_sale_pct": 11.02,
+        "lead_to_sale_rank": 2
+      }
+    ]
+  },
+  "C6_TEST_05": {
+    "columns": [
+      "dealer_name",
+      "country",
+      "leads_2024",
+      "sales_2024",
+      "lead_to_sale_pct_2024",
+      "leads_2025",
+      "sales_2025",
+      "lead_to_sale_pct_2025",
+      "improvement_percentage_points"
+    ],
+    "rows": [
+      {
+        "dealer_name": "GH-Dealer-019",
+        "country": "GH",
+        "leads_2024": 422,
+        "sales_2024": 99,
+        "lead_to_sale_pct_2024": 23.46,
+        "leads_2025": 331,
+        "sales_2025": 102,
+        "lead_to_sale_pct_2025": 30.82,
+        "improvement_percentage_points": 7.36
+      },
+      {
+        "dealer_name": "KE-Dealer-023",
+        "country": "KE",
+        "leads_2024": 222,
+        "sales_2024": 24,
+        "lead_to_sale_pct_2024": 10.81,
+        "leads_2025": 225,
+        "sales_2025": 38,
+        "lead_to_sale_pct_2025": 16.89,
+        "improvement_percentage_points": 6.08
+      },
+      {
+        "dealer_name": "NG-Dealer-036",
+        "country": "NG",
+        "leads_2024": 275,
+        "sales_2024": 20,
+        "lead_to_sale_pct_2024": 7.27,
+        "leads_2025": 238,
+        "sales_2025": 30,
+        "lead_to_sale_pct_2025": 12.61,
+        "improvement_percentage_points": 5.34
+      },
+      {
+        "dealer_name": "KE-Dealer-026",
+        "country": "KE",
+        "leads_2024": 382,
+        "sales_2024": 20,
+        "lead_to_sale_pct_2024": 5.24,
+        "leads_2025": 331,
+        "sales_2025": 32,
+        "lead_to_sale_pct_2025": 9.67,
+        "improvement_percentage_points": 4.43
+      },
+      {
+        "dealer_name": "NG-Dealer-040",
+        "country": "NG",
+        "leads_2024": 451,
+        "sales_2024": 53,
+        "lead_to_sale_pct_2024": 11.75,
+        "leads_2025": 434,
+        "sales_2025": 69,
+        "lead_to_sale_pct_2025": 15.9,
+        "improvement_percentage_points": 4.15
+      }
+    ]
+  },
+  "C6_TEST_06": {
+    "columns": [
+      "month",
+      "application_count",
+      "sales_count",
+      "revenue_usd",
+      "gap",
+      "revenue_rank",
+      "gap_rank"
+    ],
+    "rows": [
+      {
+        "month": "2025-01-01",
+        "application_count": 171,
+        "sales_count": 67,
+        "revenue_usd": 1093323.14,
+        "gap": 104,
+        "revenue_rank": 7,
+        "gap_rank": 6
+      },
+      {
+        "month": "2025-02-01",
+        "application_count": 173,
+        "sales_count": 65,
+        "revenue_usd": 1034365.0,
+        "gap": 108,
+        "revenue_rank": 9,
+        "gap_rank": 4
+      },
+      {
+        "month": "2025-03-01",
+        "application_count": 199,
+        "sales_count": 78,
+        "revenue_usd": 1215850.06,
+        "gap": 121,
+        "revenue_rank": 4,
+        "gap_rank": 2
+      },
+      {
+        "month": "2025-04-01",
+        "application_count": 219,
+        "sales_count": 84,
+        "revenue_usd": 1374531.43,
+        "gap": 135,
+        "revenue_rank": 2,
+        "gap_rank": 1
+      },
+      {
+        "month": "2025-05-01",
+        "application_count": 191,
+        "sales_count": 92,
+        "revenue_usd": 1522203.81,
+        "gap": 99,
+        "revenue_rank": 1,
+        "gap_rank": 8
+      },
+      {
+        "month": "2025-06-01",
+        "application_count": 189,
+        "sales_count": 83,
+        "revenue_usd": 1317690.05,
+        "gap": 106,
+        "revenue_rank": 3,
+        "gap_rank": 5
+      },
+      {
+        "month": "2025-07-01",
+        "application_count": 178,
+        "sales_count": 74,
+        "revenue_usd": 1127197.83,
+        "gap": 104,
+        "revenue_rank": 6,
+        "gap_rank": 6
+      },
+      {
+        "month": "2025-08-01",
+        "application_count": 159,
+        "sales_count": 56,
+        "revenue_usd": 915435.69,
+        "gap": 103,
+        "revenue_rank": 10,
+        "gap_rank": 7
+      },
+      {
+        "month": "2025-09-01",
+        "application_count": 178,
+        "sales_count": 65,
+        "revenue_usd": 1076580.88,
+        "gap": 113,
+        "revenue_rank": 8,
+        "gap_rank": 3
+      },
+      {
+        "month": "2025-10-01",
+        "application_count": 142,
+        "sales_count": 73,
+        "revenue_usd": 1164699.28,
+        "gap": 69,
+        "revenue_rank": 5,
+        "gap_rank": 11
+      },
+      {
+        "month": "2025-11-01",
+        "application_count": 128,
+        "sales_count": 41,
+        "revenue_usd": 658011.67,
+        "gap": 87,
+        "revenue_rank": 12,
+        "gap_rank": 9
+      },
+      {
+        "month": "2025-12-01",
+        "application_count": 126,
+        "sales_count": 46,
+        "revenue_usd": 736340.18,
+        "gap": 80,
+        "revenue_rank": 11,
+        "gap_rank": 10
+      }
+    ]
+  }
+}
