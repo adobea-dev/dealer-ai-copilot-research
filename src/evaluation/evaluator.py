@@ -759,6 +759,103 @@ def _number(
     return float(value)
 
 
+def _canonical_temporal_value(
+    component: str,
+    value: Any,
+) -> str | None:
+    """Normalize benchmark month/quarter identities across equivalent formats.
+
+    PostgreSQL date buckets are serialized in the frozen gold files as values
+    such as ``2025-04-01`` while a system may correctly return the same month
+    as ``2025-04``.  Those representations are semantically identical for a
+    benchmark component named ``month``.  The same principle is applied to
+    quarter identities.
+    """
+
+    normalized_component = _norm(component)
+
+    if normalized_component not in {"month", "quarter"}:
+        return None
+
+    if value is None:
+        return None
+
+    # Support date/datetime-like objects without importing pandas.
+    if (
+        normalized_component == "month"
+        and hasattr(value, "year")
+        and hasattr(value, "month")
+    ):
+        try:
+            return f"{int(value.year):04d}-{int(value.month):02d}"
+        except (TypeError, ValueError):
+            pass
+
+    text = str(value).strip()
+    if not text:
+        return None
+
+    if normalized_component == "month":
+        # YYYY-MM, YYYY-MM-DD, and ISO timestamps.  Since the benchmark
+        # component itself is a month bucket, any day in that month maps to
+        # the same semantic month identity.
+        match = re.match(
+            r"^(\d{4})[-/](\d{1,2})(?:[-/](\d{1,2}))?(?:[T\s].*)?$",
+            text,
+        )
+        if match:
+            year = int(match.group(1))
+            month = int(match.group(2))
+            if 1 <= month <= 12:
+                return f"{year:04d}-{month:02d}"
+
+        # Common human-readable month forms.
+        month_names = {
+            "jan": 1, "january": 1,
+            "feb": 2, "february": 2,
+            "mar": 3, "march": 3,
+            "apr": 4, "april": 4,
+            "may": 5,
+            "jun": 6, "june": 6,
+            "jul": 7, "july": 7,
+            "aug": 8, "august": 8,
+            "sep": 9, "sept": 9, "september": 9,
+            "oct": 10, "october": 10,
+            "nov": 11, "november": 11,
+            "dec": 12, "december": 12,
+        }
+
+        lowered = text.lower().replace(",", " ")
+        tokens = [token for token in re.split(r"[\s_/.-]+", lowered) if token]
+
+        year = next(
+            (int(token) for token in tokens if re.fullmatch(r"\d{4}", token)),
+            None,
+        )
+        month = next(
+            (month_names[token] for token in tokens if token in month_names),
+            None,
+        )
+
+        if year is not None and month is not None:
+            return f"{year:04d}-{month:02d}"
+
+        return None
+
+    # Quarter formats: 2025-Q1, 2025 Q1, Q1-2025, Q1 2025.
+    compact = re.sub(r"[^a-z0-9]+", "", text.lower())
+
+    match = re.fullmatch(r"(\d{4})q([1-4])", compact)
+    if match:
+        return f"{int(match.group(1)):04d}-Q{match.group(2)}"
+
+    match = re.fullmatch(r"q([1-4])(\d{4})", compact)
+    if match:
+        return f"{int(match.group(2)):04d}-Q{match.group(1)}"
+
+    return None
+
+
 # ---------------------------------------------------------------------
 # NUMERIC COMPARISON
 # ---------------------------------------------------------------------
@@ -813,6 +910,25 @@ def _equal(
         return (
             expected is None
             and actual is None
+        )
+
+    expected_temporal = _canonical_temporal_value(
+        component,
+        expected,
+    )
+    actual_temporal = _canonical_temporal_value(
+        component,
+        actual,
+    )
+
+    if (
+        expected_temporal is not None
+        or actual_temporal is not None
+    ):
+        return (
+            expected_temporal is not None
+            and actual_temporal is not None
+            and expected_temporal == actual_temporal
         )
 
     if isinstance(expected, bool) or isinstance(actual, bool):
@@ -1060,7 +1176,14 @@ def _row_key(
 
         value = row.get(source)
 
-        if isinstance(value, str):
+        temporal_value = _canonical_temporal_value(
+            column,
+            value,
+        )
+
+        if temporal_value is not None:
+            value = temporal_value
+        elif isinstance(value, str):
             value = _norm(value)
 
         values.append(value)
@@ -1616,15 +1739,29 @@ def _max_identity(
         for row in usable
     )
 
-    return {
-        row[identity_column]
-        for row in usable
-        if _equal(
+    winners: set[Any] = set()
+
+    for row in usable:
+        if not _equal(
             target,
             row[metric_column],
             metric_column,
+        ):
+            continue
+
+        identity_value = row[identity_column]
+        canonical_identity = _canonical_temporal_value(
+            identity_column,
+            identity_value,
         )
-    }
+
+        winners.add(
+            canonical_identity
+            if canonical_identity is not None
+            else identity_value
+        )
+
+    return winners
 
 
 def _with_derived_gap(
@@ -2144,9 +2281,35 @@ def _explanation_correct(
 # VISUALIZATION SCORING
 # ---------------------------------------------------------------------
 
+# Explicit, pre-registered visualization requirements for the two
+# visualization-required benchmark tasks.
+#
+# These are evaluator-side scoring specifications only. They contain no
+# gold numeric answers and are used only to verify that the exact rows and
+# series passed to the deterministic plotting tool match the frozen gold data.
+VISUALIZATION_SPECS: dict[str, dict[str, Any]] = {
+    "C6_DEV_02": {
+        "x_component": "month",
+        "series_components": (
+            "application_count",
+            "sales_count",
+        ),
+    },
+    "C6_TEST_06": {
+        "x_component": "month",
+        "series_components": (
+            "application_count",
+            "sales_count",
+            "revenue_usd",
+        ),
+    },
+}
+
+
 def _visualization_path(
     value: Any,
 ) -> str | None:
+    """Extract an artifact path from supported visualization result shapes."""
 
     if (
         isinstance(value, str)
@@ -2161,82 +2324,425 @@ def _visualization_path(
             "file_path",
             "visualization_path",
         ):
-
-            candidate = value.get(
-                key
-            )
+            candidate = value.get(key)
 
             if (
-                isinstance(
-                    candidate,
-                    str,
-                )
+                isinstance(candidate, str)
                 and candidate.strip()
             ):
-                return (
-                    candidate.strip()
-                )
+                return candidate.strip()
 
     return None
 
 
-def _visualization_correct(
-    value: Any,
-) -> tuple[bool, str]:
+def _find_visualization_tool_call(
+    result: dict[str, Any],
+) -> tuple[
+    dict[str, Any] | None,
+    dict[str, Any] | None,
+]:
+    """Return the most recent create_visualization call and its tool result."""
 
-    path_text = (
-        _visualization_path(
-            value
-        )
+    trajectory = result.get(
+        "trajectory",
+        [],
     )
 
-    if not path_text:
+    if not isinstance(trajectory, list):
+        return None, None
+
+    selected_call: dict[str, Any] | None = None
+    selected_result: dict[str, Any] | None = None
+
+    for index, event in enumerate(trajectory):
+
+        if not isinstance(event, dict):
+            continue
+
+        if (
+            event.get("event") != "tool_call"
+            or event.get("tool") != "create_visualization"
+        ):
+            continue
+
+        selected_call = event
+        selected_result = None
+
+        for later_event in trajectory[index + 1 :]:
+
+            if not isinstance(later_event, dict):
+                continue
+
+            if (
+                later_event.get("event") == "tool_result"
+                and later_event.get("tool") == "create_visualization"
+            ):
+                selected_result = later_event
+                break
+
+            if later_event.get("event") == "tool_call":
+                break
+
+    return selected_call, selected_result
+
+
+def _canonical_visualization_column(
+    actual_name: str,
+    expected_components: Iterable[str],
+) -> str | None:
+    """Map one plotting key to one expected benchmark component."""
+
+    actual_normalized = _norm(actual_name)
+
+    for component in expected_components:
+        if actual_normalized in {
+            _norm(candidate)
+            for candidate in _alias_candidates(component)
+        }:
+            return component
+
+    return None
+
+
+def _parse_visualization_rows(
+    arguments: dict[str, Any],
+) -> tuple[
+    list[dict[str, Any]] | None,
+    str | None,
+]:
+    """Parse the exact rows supplied to create_visualization."""
+
+    data_json = arguments.get("data_json")
+
+    if not isinstance(data_json, str):
         return (
-            False,
-            (
-                "Required visualization "
-                "is missing."
-            ),
+            None,
+            "Visualization tool call has no string data_json argument.",
         )
 
-    path = Path(
-        path_text
-    )
-
-    if not path.exists():
+    try:
+        rows = json.loads(data_json)
+    except json.JSONDecodeError as exc:
         return (
-            False,
-            (
-                "Visualization path "
-                "does not exist: "
-                f"{path_text}"
-            ),
+            None,
+            f"Visualization data_json could not be parsed: {exc}",
         )
 
     if (
-        path.suffix.lower()
-        not in {
-            ".png",
-            ".jpg",
-            ".jpeg",
-            ".svg",
-            ".pdf",
-        }
+        not isinstance(rows, list)
+        or not rows
+        or not all(isinstance(row, dict) for row in rows)
     ):
+        return (
+            None,
+            "Visualization data_json must contain a non-empty array of row objects.",
+        )
+
+    return rows, None
+
+
+def _visualization_data_matches_gold(
+    task_id: str,
+    chart_rows: list[dict[str, Any]],
+    x_key: str,
+    y_keys: list[str],
+    expected_rows: list[dict[str, Any]],
+) -> tuple[bool, str]:
+    """Verify exact chart scope, series, and plotted values against gold."""
+
+    spec = VISUALIZATION_SPECS.get(task_id)
+
+    if spec is None:
+        return (
+            False,
+            f"No frozen visualization specification exists for {task_id!r}.",
+        )
+
+    expected_x = str(spec["x_component"])
+    expected_series = tuple(spec["series_components"])
+
+    mapped_x = _canonical_visualization_column(
+        x_key,
+        (expected_x,),
+    )
+
+    if mapped_x != expected_x:
         return (
             False,
             (
-                "Visualization has "
-                "unsupported file type: "
-                f"{path.suffix}"
+                "Visualization x-axis does not match required component "
+                f"{expected_x!r}: received {x_key!r}."
             ),
         )
+
+    mapped_series: dict[str, str] = {}
+
+    for actual_key in y_keys:
+        component = _canonical_visualization_column(
+            actual_key,
+            expected_series,
+        )
+
+        if component is None:
+            return (
+                False,
+                f"Visualization contains an unrecognized plotted series: {actual_key!r}.",
+            )
+
+        if component in mapped_series:
+            return (
+                False,
+                (
+                    "Visualization maps multiple series to benchmark component "
+                    f"{component!r}."
+                ),
+            )
+
+        mapped_series[component] = actual_key
+
+    missing_series = [
+        component
+        for component in expected_series
+        if component not in mapped_series
+    ]
+
+    if missing_series:
+        return (
+            False,
+            f"Visualization is missing required series: {missing_series!r}.",
+        )
+
+    mapping = {expected_x: x_key}
+    mapping.update(mapped_series)
+
+    comparison_columns = [
+        expected_x,
+        *expected_series,
+    ]
+
+    aligned, ok, detail = _align_rows(
+        expected_rows,
+        chart_rows,
+        comparison_columns,
+        mapping,
+    )
+
+    if not ok:
+        return (
+            False,
+            f"Visualization categories/scope do not match gold. {detail}",
+        )
+
+    for expected_row, chart_row in aligned:
+        for component in expected_series:
+            actual_column = mapping[component]
+            expected_value = expected_row.get(component)
+            actual_value = chart_row.get(actual_column)
+
+            if not _equal(
+                expected_value,
+                actual_value,
+                component,
+            ):
+                return (
+                    False,
+                    (
+                        f"Visualization value mismatch for {component!r}: "
+                        f"expected {expected_value!r}, actual {actual_value!r}."
+                    ),
+                )
 
     return (
         True,
         (
-            "Visualization artifact exists: "
-            f"{path_text}"
+            "Visualization scope, categories, series, and plotted values "
+            "match gold."
+        ),
+    )
+
+
+def _visualization_correct(
+    task: dict[str, Any],
+    result: dict[str, Any],
+    expected_rows: list[dict[str, Any]],
+) -> tuple[bool, str]:
+    """Score a required visualization deterministically from recorded tool inputs."""
+
+    task_id = str(
+        result.get("task_id")
+        or task.get("task_id")
+        or ""
+    )
+
+    if not task_id:
+        return False, "Visualization task has no task_id."
+
+    spec = VISUALIZATION_SPECS.get(task_id)
+
+    if spec is None:
+        return (
+            False,
+            f"No frozen visualization specification exists for {task_id!r}.",
+        )
+
+    tool_call, tool_result_event = _find_visualization_tool_call(result)
+
+    if tool_call is None:
+        return (
+            False,
+            "Required create_visualization tool call was not recorded.",
+        )
+
+    arguments = tool_call.get("arguments", {})
+
+    if not isinstance(arguments, dict):
+        return (
+            False,
+            "Visualization tool arguments are missing or invalid.",
+        )
+
+    tool_result: dict[str, Any] | None = None
+
+    if isinstance(tool_result_event, dict):
+        candidate = tool_result_event.get("result")
+        if isinstance(candidate, dict):
+            tool_result = candidate
+
+    fallback_value = (
+        result.get("visualization")
+        or result.get("visualization_path")
+    )
+
+    path_text: str | None = None
+
+    if tool_result is not None:
+        if tool_result.get("status") != "success":
+            return (
+                False,
+                "create_visualization did not return success.",
+            )
+
+        path_text = _visualization_path(tool_result)
+
+    if not path_text:
+        path_text = _visualization_path(fallback_value)
+
+    if not path_text:
+        return (
+            False,
+            "Required visualization artifact path is missing.",
+        )
+
+    path = Path(path_text)
+
+    if not path.exists():
+        return (
+            False,
+            f"Visualization path does not exist: {path_text}",
+        )
+
+    if path.suffix.lower() not in {
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".svg",
+        ".pdf",
+    }:
+        return (
+            False,
+            f"Visualization has unsupported file type: {path.suffix}",
+        )
+
+    chart_type = str(arguments.get("chart_type", "")).strip().lower()
+
+    if chart_type not in {"line", "bar"}:
+        return (
+            False,
+            f"Visualization chart type is unsupported: {chart_type!r}.",
+        )
+
+    title = arguments.get("title")
+    x_key = arguments.get("x_key")
+    y_keys = arguments.get("y_keys")
+
+    if not isinstance(title, str) or not title.strip():
+        return False, "Visualization title is missing."
+
+    if not isinstance(x_key, str) or not x_key.strip():
+        return False, "Visualization x-axis key is missing."
+
+    if (
+        not isinstance(y_keys, list)
+        or not y_keys
+        or not all(
+            isinstance(key, str) and key.strip()
+            for key in y_keys
+        )
+    ):
+        return (
+            False,
+            "Visualization series labels are missing or invalid.",
+        )
+
+    chart_rows, parse_error = _parse_visualization_rows(arguments)
+
+    if chart_rows is None:
+        return (
+            False,
+            parse_error or "Visualization rows are unavailable.",
+        )
+
+    if tool_result is not None:
+        row_count = tool_result.get("row_count")
+
+        if (
+            _is_number(row_count)
+            and int(float(row_count)) != len(chart_rows)
+        ):
+            return (
+                False,
+                (
+                    "Visualization tool result row_count does not match "
+                    "the supplied chart data."
+                ),
+            )
+
+        returned_series = tool_result.get("series")
+
+        if (
+            isinstance(returned_series, list)
+            and [_norm(value) for value in returned_series]
+            != [_norm(value) for value in y_keys]
+        ):
+            return (
+                False,
+                (
+                    "Visualization tool result series metadata does not match "
+                    "the requested plotted series."
+                ),
+            )
+
+    data_ok, data_detail = _visualization_data_matches_gold(
+        task_id,
+        chart_rows,
+        x_key,
+        y_keys,
+        expected_rows,
+    )
+
+    if not data_ok:
+        return False, data_detail
+
+    expected_series = tuple(spec["series_components"])
+
+    return (
+        True,
+        (
+            "Visualization artifact exists; "
+            f"x-axis={spec['x_component']!r}; "
+            f"required series={list(expected_series)!r}; "
+            "scope/categories and plotted values match gold; "
+            "title and series labels are identifiable."
         ),
     )
 
@@ -2653,18 +3159,11 @@ class BenchmarkEvaluator:
 
             elif component == "visualization":
 
-                value = (
-                    result.get(
-                        "visualization"
-                    )
-                    or result.get(
-                        "visualization_path"
-                    )
-                )
-
                 correct, detail = (
                     _visualization_correct(
-                        value
+                        task,
+                        result,
+                        expected_rows,
                     )
                 )
 
