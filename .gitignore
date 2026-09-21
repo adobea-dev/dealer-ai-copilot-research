@@ -9,6 +9,9 @@ dealerai-env/
 .venv/
 venv/
 env/
+.env
+.env.*
+!.env.example
 
 
 # Jupyter
