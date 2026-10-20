@@ -20,3 +20,5 @@ Synthetic dealer analytics dataset design and validation.
 8. Build natural-language explanation baseline
 9. Build agentic analytics system using Google ADK
 10. Run system and human evaluations
+
+Here is how it works.
