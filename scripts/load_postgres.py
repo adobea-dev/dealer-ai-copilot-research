@@ -4,10 +4,23 @@ import csv
 import getpass
 import os
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
-import psycopg
+if TYPE_CHECKING:
+    import psycopg
+else:
+    try:
+        import psycopg
+    except ImportError:  # pragma: no cover - handled at runtime
+        psycopg = None  # type: ignore[assignment]
 
 from src.dealer_data.config import CONFIG
+
+if psycopg is None:
+    raise RuntimeError(
+        "psycopg is required to load the PostgreSQL dataset. "
+        "Install it with: pip install psycopg[binary]"
+    )
 
 
 # =====================================================================
@@ -1112,4 +1125,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+     main()
